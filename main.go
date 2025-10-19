@@ -9,9 +9,10 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
+
+	Log "github.com/apatters/go-conlog"
 )
 
 var i = true
@@ -51,7 +52,7 @@ type writeDestination struct {
 	writeToFile    bool
 }
 
-var traversal filepath.WalkFunc = func(fp string, info os.FileInfo, err error) error {
+var traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) error {
 	if err != nil {
 		return err
 	}
@@ -61,15 +62,17 @@ var traversal filepath.WalkFunc = func(fp string, info os.FileInfo, err error) e
 	}
 	i = false
 
-	image := strings.TrimPrefix(path, fmt.Sprintf("%s", rootp))
-	if runtime.GOOS == "windows" {
-		image = fmt.Sprintf("/%s", image)
-	}
+	image := strings.TrimPrefix(path, rootp)
 	/*
-		fmt.Printf("path: %s\n", path)
-		fmt.Printf("rootp: %s\n", rootp)
-		fmt.Printf("image: %s\n", image)
+		if runtime.GOOS == "windows" {
+			image = fmt.Sprintf("/%s", image)
+		}
 	*/
+	image = fmt.Sprintf("/%s", image)
+
+	Log.Debugf("path: %s\n", path)
+	Log.Debugf("rootp: %s\n", rootp)
+	Log.Debugf("image: %s\n", image)
 
 	regex := `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*).*\.FIT`
 	re := *regexp.MustCompilePOSIX(regex)
@@ -80,8 +83,10 @@ var traversal filepath.WalkFunc = func(fp string, info os.FileInfo, err error) e
 		filter := splitline[0][2]
 		expo, _ := strconv.Atoi(splitline[0][3])
 
+		Log.Debugf("object %s", object)
+
 		if !targetList.exist(object) {
-			o = newTarget(object, expo)
+			o = newTarget(object)
 		}
 		o.iterateFilter(filter, expo)
 
@@ -90,12 +95,15 @@ var traversal filepath.WalkFunc = func(fp string, info os.FileInfo, err error) e
 	return nil
 }
 
-var lightsdir = flag.String("dir", "D:/Data/Voyager/Lights/", "lights directory")
+var (
+	lightsdir = flag.String("dir", "D:/Data/Voyager/Lights/", "lights directory")
+	verbosity = flag.String("level", "warn", "set log level of clandestine default warn")
+)
 
 func main() {
-
 	writeConfig := writeDestination{true, true}
 	flag.Parse()
+	setUpLogs()
 
 	err := filepath.Walk(*lightsdir, traversal)
 	if err != nil {
@@ -104,10 +112,12 @@ func main() {
 	targetList.printObjects(writeConfig)
 }
 
+/*
 func (ts targets) get(key string) *target {
 	obj := ts[key]
 	return &obj
 }
+*/
 
 func (ts targets) set(key string, value *target) {
 	ts[key] = *value
@@ -122,10 +132,14 @@ func (ts targets) exist(key string) bool {
 	return false
 }
 
+/*
 func (t *target) printObject() {
-	fmt.Printf("filters: %d %d %d %d %d %d %d\n", t.L, t.R, t.G, t.B, t.R1, t.G1, t.B1, t.S, t.H, t.O)
-	fmt.Printf("expt. %d %d %d %d %d %d %d\n", t.Lexpo, t.Rexpo, t.Gexpo, t.Bexpo, t.R1expo, t.G1expo, t.B1expo, t.Sexpo, t.Hexpo, t.Oexpo)
+	fmt.Printf("filters: %d %d %d %d %d %d %d %d %d %d\n",
+		t.L, t.R, t.G, t.B, t.R1, t.G1, t.B1, t.S, t.H, t.O)
+	fmt.Printf("expo: %d %d %d %d %d %d %d %d %d %d\n",
+		t.Lexpo, t.Rexpo, t.Gexpo, t.Bexpo, t.R1expo, t.G1expo, t.B1expo, t.Sexpo, t.Hexpo, t.Oexpo)
 }
+*/
 
 func (t *target) iterateFilter(filter string, expo int) {
 	switch filter {
@@ -168,7 +182,7 @@ func (t *target) iterateFilter(filter string, expo int) {
 	}
 }
 
-func newTarget(object string, expo int) *target {
+func newTarget(object string) *target {
 	return &target{
 		name: object,
 		L:    0,
@@ -194,14 +208,15 @@ func (ts *targets) getTargets() []string {
 }
 
 func (ts *targets) printObjects(wdest writeDestination) {
-
 	targets := ts.getTargets()
 
 	if wdest.writeToConsole {
 		fmt.Printf("Targets list: %q\n\n", targets)
 		for _, v := range *ts {
 			fmt.Println()
-			fmt.Printf("Object: %-30s %s%s\n", v.name, "Total: ", secondsToHuman(v.L*v.Lexpo+v.R*v.Rexpo+v.G*v.Gexpo+v.B*v.Bexpo+v.S*v.Sexpo+v.H*v.Hexpo+v.O*v.Oexpo))
+			fmt.Printf("Object: %-30s Total:%s\n",
+				v.name,
+				secondsToHuman(v.L*v.Lexpo+v.R*v.Rexpo+v.G*v.Gexpo+v.B*v.Bexpo+v.S*v.Sexpo+v.H*v.Hexpo+v.O*v.Oexpo))
 			if v.L > 0 || v.R > 0 || v.G > 0 || v.B > 0 {
 				fmt.Println()
 			}
@@ -246,19 +261,21 @@ func (ts *targets) printObjects(wdest writeDestination) {
 	}
 
 	if wdest.writeToFile {
-
 		dest := fmt.Sprintf("%s/Lights_Report.txt", *lightsdir)
 		report, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer report.Close()
+
 		buff := bufio.NewWriter(report)
 
 		fmt.Fprintf(buff, "Targets list: %q\n\n", targets)
 		for _, v := range *ts {
 			fmt.Fprintln(buff)
-			fmt.Fprintf(buff, "Object: %-30s %s%s\n", v.name, "Total: ", secondsToHuman(v.L*v.Lexpo+v.R*v.Rexpo+v.G*v.Gexpo+v.B*v.Bexpo+v.S*v.Sexpo+v.H*v.Hexpo+v.O*v.Oexpo))
+			fmt.Fprintf(buff, "Object: %-30s Total: %s\n",
+				v.name,
+				secondsToHuman(v.L*v.Lexpo+v.R*v.Rexpo+v.G*v.Gexpo+v.B*v.Bexpo+v.S*v.Sexpo+v.H*v.Hexpo+v.O*v.Oexpo))
 			if v.L > 0 || v.R > 0 || v.G > 0 || v.B > 0 {
 				fmt.Fprintln(buff)
 			}
@@ -301,12 +318,13 @@ func (ts *targets) printObjects(wdest writeDestination) {
 			fmt.Fprintln(buff)
 		}
 		buff.Flush()
-		report.Sync()
+		_ = report.Sync()
 		report.Close()
 	}
 }
 
-func plural(count int, singular string) (result string) {
+func plural(count int, singular string) string {
+	var result string
 	if (count == 1) || (count == 0) {
 		//result = strconv.Itoa(count) + " " + singular + " "
 		result = fmt.Sprintf("%02d %s  ", count, singular)
@@ -314,20 +332,39 @@ func plural(count int, singular string) (result string) {
 		//result = strconv.Itoa(count) + " " + singular + "s "
 		result = fmt.Sprintf("%02d %ss ", count, singular)
 	}
-	return
+	return result
 }
 
-func secondsToHuman(input int) (result string) {
+func secondsToHuman(input int) string {
+	var result string
 	hours := math.Floor(float64(input) / 60 / 60)
 	seconds := input % (60 * 60)
 	minutes := math.Floor(float64(seconds) / 60)
 	seconds = input % 60
 	if hours > 0 {
-		result = plural(int(hours), "hour") + plural(int(minutes), "minute") + plural(int(seconds), "second")
+		result = plural(int(hours), "hour") + plural(int(minutes), "minute") + plural(seconds, "second")
 	} else if minutes > 0 {
-		result = plural(int(minutes), "minute") + plural(int(seconds), "second")
+		result = plural(int(minutes), "minute") + plural(seconds, "second")
 	} else {
-		result = plural(int(seconds), "second")
+		result = plural(seconds, "second")
 	}
-	return
+	return result
+}
+
+func setUpLogs() {
+	formatter := Log.NewStdFormatter()
+	formatter.Options.LogLevelFmt = Log.LogLevelFormatLongTitle
+	Log.SetFormatter(formatter)
+	switch *verbosity {
+	case "debug":
+		Log.SetLevel(Log.DebugLevel)
+	case "info":
+		Log.SetLevel(Log.InfoLevel)
+	case "warn":
+		Log.SetLevel(Log.WarnLevel)
+	case "error":
+		Log.SetLevel(Log.ErrorLevel)
+	default:
+		Log.SetLevel(Log.WarnLevel)
+	}
 }
