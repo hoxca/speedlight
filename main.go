@@ -70,8 +70,10 @@ var traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) erro
 	*/
 	image = fmt.Sprintf("/%s", image)
 
-	Log.Debugf("path: %s\n", path)
-	Log.Debugf("rootp: %s\n", rootp)
+	/*
+		Log.Debugf("path: %s\n", path)
+		Log.Debugf("rootp: %s\n", rootp)
+	*/
 	Log.Debugf("image: %s\n", image)
 
 	regex := `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*).*\.FIT`
@@ -89,8 +91,10 @@ var traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) erro
 			o = newTarget(object)
 		}
 		o.iterateFilter(filter, expo)
-
 		targetList.set(object, o)
+		if *verbosity == "debug" {
+			o.printObject()
+		}
 	}
 	return nil
 }
@@ -132,14 +136,12 @@ func (ts targets) exist(key string) bool {
 	return false
 }
 
-/*
 func (t *target) printObject() {
-	fmt.Printf("filters: %d %d %d %d %d %d %d %d %d %d\n",
+	Log.Debugf("filters: %d %d %d %d %d %d %d %d %d %d",
 		t.L, t.R, t.G, t.B, t.R1, t.G1, t.B1, t.S, t.H, t.O)
-	fmt.Printf("expo: %d %d %d %d %d %d %d %d %d %d\n",
+	Log.Debugf("expo: %d %d %d %d %d %d %d %d %d %d\n",
 		t.Lexpo, t.Rexpo, t.Gexpo, t.Bexpo, t.R1expo, t.G1expo, t.B1expo, t.Sexpo, t.Hexpo, t.Oexpo)
 }
-*/
 
 func (t *target) iterateFilter(filter string, expo int) {
 	switch filter {
@@ -196,7 +198,6 @@ func newTarget(object string) *target {
 		H:    0,
 		O:    0,
 	}
-	//	return &newobject
 }
 
 func (ts *targets) getTargets() []string {
@@ -326,10 +327,8 @@ func (ts *targets) printObjects(wdest writeDestination) {
 func plural(count int, singular string) string {
 	var result string
 	if (count == 1) || (count == 0) {
-		//result = strconv.Itoa(count) + " " + singular + " "
 		result = fmt.Sprintf("%02d %s  ", count, singular)
 	} else {
-		//result = strconv.Itoa(count) + " " + singular + "s "
 		result = fmt.Sprintf("%02d %ss ", count, singular)
 	}
 	return result
