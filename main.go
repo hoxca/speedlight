@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-var logFatal = log.Fatal
+// var logFatal = log.Fatal
 
 var (
 	lightsdir = flag.String("dir", "D:/Data/Voyager/Lights/", "lights directory")
@@ -14,7 +14,7 @@ var (
 )
 
 func main() {
-	writeConfig := writeDestination{true, true}
+	// writeConfig := writeDestination{true, true} .
 	flag.Parse()
 	setUpLogs()
 
@@ -22,5 +22,6 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	targetList.printObjects(writeConfig)
+	objectList.printObjects()
+	// targetList.printObjects(writeConfig) .
 }

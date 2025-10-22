@@ -1,26 +1,38 @@
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"math"
-	"os"
+import "fmt"
 
-	Log "github.com/apatters/go-conlog"
-)
-
+/*
 type writeDestination struct {
 	writeToConsole bool
 	writeToFile    bool
 }
+*/
 
-func (t *target) printObject() {
-	Log.Debugf("filters: %d %d %d %d %d %d %d %d %d %d",
-		t.L, t.R, t.G, t.B, t.R1, t.G1, t.B1, t.S, t.H, t.O)
-	Log.Debugf("expo: %d %d %d %d %d %d %d %d %d %d\n",
-		t.Lexpo, t.Rexpo, t.Gexpo, t.Bexpo, t.R1expo, t.G1expo, t.B1expo, t.Sexpo, t.Hexpo, t.Oexpo)
+func (os *Objects) printObjects() {
+	objects := os.getObjects()
+	fmt.Printf("Targets list: %q\n", objects)
+	for _, v := range *os {
+		v.printObject()
+	}
 }
 
+func (o *Object) printObject() {
+	fmt.Printf("Object name: %s\n", o.name)
+	ts := o.targets
+	for _, v := range ts {
+		v.printTarget()
+	}
+}
+
+func (t *Target) printTarget() {
+	fmt.Printf("\tTarget Name: %s\n\tTarget temperature: %d\n\tTarget exposure: %d\n\tTarget rotation: %d\n",
+		t.name, t.temp, t.expo, t.rot)
+	fmt.Printf("\tFilters: {\n \t L:%d\n \t R:%d\n \t G:%d\n \t B:%d\n \t S:%d\n \t H:%d\n \t O:%d\n\t}\n",
+		t.fltr.L, t.fltr.R, t.fltr.G, t.fltr.B, t.fltr.S, t.fltr.H, t.fltr.O)
+}
+
+/*
 func (ts *targets) printObjects(wdest writeDestination) {
 	targets := ts.getTargets()
 
@@ -163,3 +175,4 @@ func secondsToHuman(input int) string {
 	}
 	return result
 }
+*/
