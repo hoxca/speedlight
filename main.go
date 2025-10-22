@@ -101,7 +101,7 @@ var traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) erro
 
 var (
 	lightsdir = flag.String("dir", "D:/Data/Voyager/Lights/", "lights directory")
-	verbosity = flag.String("level", "warn", "set log level of clandestine default warn")
+	verbosity = flag.String("level", "warn", "set log level of speedlight default warn")
 )
 
 func main() {
