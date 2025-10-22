@@ -11,6 +11,7 @@ import (
 var (
 	lightsdir = flag.String("dir", "D:/Data/Voyager/Lights/", "lights directory")
 	verbosity = flag.String("level", "warn", "set log level of speedlight default warn")
+	rotUnused = flag.Bool("rot", true, "tell if rotation is used")
 )
 
 func main() {

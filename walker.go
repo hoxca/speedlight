@@ -40,7 +40,7 @@ var traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) erro
 
 	//  CR399_LIGHT_L_600s_BIN1_-20C_002_20221015_222558_734_E .
 
-	regex := `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_[[:digit:]]{3}_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_[EW]*.*\.FIT`
+	regex := `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_[[:digit:]]{3}_[[:digit:]]{8}_[[:digit:]]{6}_([[:digit:]]{3})_[EW]*.*\.FIT`
 	re := *regexp.MustCompilePOSIX(regex)
 	splitline := re.FindAllStringSubmatch(image, -1)
 
@@ -49,7 +49,10 @@ var traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) erro
 		filter := splitline[0][2]
 		expo, _ := strconv.Atoi(splitline[0][3])
 		temperature, _ := strconv.Atoi(splitline[0][4])
-		rotation := 90
+		rotation, _ := strconv.Atoi(splitline[0][5])
+		if !*rotUnused {
+			rotation = 666
+		}
 
 		Log.Debugf("object %s filter %s expo %d temperature %d", object, filter, expo, temperature)
 
