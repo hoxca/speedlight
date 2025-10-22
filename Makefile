@@ -21,7 +21,7 @@ all: fmt lint | $(BIN) ; $(info $(M) building executable…) @ ## Build program 
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' \
-		-o $(BIN)/$(basename $(MODULE)) main.go
+		-o $(BIN)/$(basename $(MODULE)) *.go
 
 # Tools
 
@@ -94,14 +94,14 @@ build: ; $(info $(M) building executable…) @ ## Build program binary
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' \
-		-o $(BIN)/$(basename $(MODULE)) main.go
+		-o $(BIN)/$(basename $(MODULE)) *.go
 
 .PHONY: winbuild
 winbuild: ; $(info $(M) building executable…) @ ## Build program binary
 	$Q GOOS=windows GOARCH=amd64 $(GO) build \
 		-tags release \
 		-ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' \
-		-o $(BIN)/$(basename $(MODULE)).exe main.go
+		-o $(BIN)/$(basename $(MODULE)).exe *.go
 
 # Misc
 
