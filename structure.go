@@ -1,46 +1,120 @@
 package main
 
-type target struct {
-	name   string
-	L      int
-	Lexpo  int
-	R      int
-	Rexpo  int
-	G      int
-	Gexpo  int
-	B      int
-	Bexpo  int
-	R1     int
-	R1expo int
-	G1     int
-	G1expo int
-	B1     int
-	B1expo int
-	S      int
-	Sexpo  int
-	H      int
-	Hexpo  int
-	O      int
-	Oexpo  int
+import (
+	"sort"
+	"strconv"
+	"strings"
+
+	Log "github.com/apatters/go-conlog"
+)
+
+type Filters struct {
+	L int
+	R int
+	G int
+	B int
+	S int
+	H int
+	O int
 }
 
-type targets map[string]target
-
-var targetList = targets{}
-var o *target
-
-func (ts targets) set(key string, value *target) {
-	ts[key] = *value
+type Target struct {
+	tuple string
+	name  string
+	temp  int
+	expo  int
+	rot   int
+	fltr  Filters
 }
 
-/*
-  func (ts targets) get(key string) *target {
-          obj := ts[key]
-          return &obj
-  }
-*/
+type Object struct {
+	name    string
+	targets map[string]Target
+}
 
-func (ts targets) exist(key string) bool {
+type Objects map[string]Object
+type Targets map[string]Target
+
+var objectList = Objects{}
+var targetList = Targets{}
+var t *Target
+var o *Object
+
+func addTarget(target string, rotation int) *Object {
+	targetList = Targets{}
+	result := strings.Split(target, "~")
+	targetName := result[0]
+	if !objectList.exist(targetName) {
+		Log.Debugf("create object %s", targetName)
+		o = newObject(target)
+		objectList.set(targetName, o)
+		// Log.Debugf("target Object: %q\n", o) .
+	}
+	o = objectList.getObject(targetName)
+	targetList = o.targets
+	// Log.Debugf("targetList %q for Object Name: %s", targetList, o.name) .
+
+	if !targetList.exist(target) {
+		Log.Debugf("create target: %s", target)
+		t = newTarget(target, rotation)
+		o.setTarget(target, t)
+		return o
+	}
+	t = targetList.getTarget(target)
+	if t != nil {
+		return o
+	}
+	return nil
+}
+
+func (o *Object) addFilter(target string, filter string) {
+	targetList = Targets{}
+	targetList = o.targets
+	t = targetList.getTarget(target)
+
+	t.iterateFilter(filter)
+	o.setTarget(t.tuple, t)
+}
+
+func (t *Target) iterateFilter(filter string) {
+	switch filter {
+	case "L":
+		t.fltr.L++
+	case "R":
+		t.fltr.R++
+	case "G":
+		t.fltr.G++
+	case "B":
+		t.fltr.B++
+	case "S":
+		t.fltr.S++
+	case "H":
+		t.fltr.H++
+	case "O":
+		t.fltr.O++
+	}
+}
+
+// Getters Setters .
+
+func (os Objects) set(key string, value *Object) {
+	os[key] = *value
+}
+
+func (o Object) setTarget(key string, value *Target) {
+	o.targets[key] = *value
+}
+
+func (os Objects) exist(key string) bool {
+	for k := range os {
+		if k == key {
+			return true
+		}
+	}
+	return false
+}
+
+func (ts Targets) exist(key string) bool {
 	for k := range ts {
 		if k == key {
 			return true
@@ -49,67 +123,63 @@ func (ts targets) exist(key string) bool {
 	return false
 }
 
-func newTarget(object string) *target {
-	return &target{
-		name: object,
-		L:    0,
-		R:    0,
-		G:    0,
-		B:    0,
-		R1:   0,
-		G1:   0,
-		B1:   0,
-		S:    0,
-		H:    0,
-		O:    0,
-	}
-}
-
-func (ts *targets) getTargets() []string {
+func (os *Objects) getObjects() []string {
 	ret := []string{}
-	for _, v := range *ts {
+	for _, v := range *os {
 		ret = append(ret, v.name)
 	}
+	sort.Strings(ret)
 	return ret
 }
 
-func (t *target) iterateFilter(filter string, expo int) {
-	switch filter {
-	case "L":
-		t.L++
-		t.Lexpo = expo
-	case "R":
-		if expo > 240 {
-			t.R++
-			t.Rexpo = expo
-		} else {
-			t.R1++
-			t.R1expo = expo
+func (ts *Targets) getTarget(target string) *Target {
+	for _, v := range *ts {
+		if v.tuple == target {
+			return &v
 		}
-	case "G":
-		if expo > 240 {
-			t.G++
-			t.Gexpo = expo
-		} else {
-			t.G1++
-			t.G1expo = expo
+	}
+	return nil
+}
+
+func (os *Objects) getObject(object string) *Object {
+	// Log.Debugf("Search for object: %s", object) .
+	for _, v := range *os {
+		// Log.Debugf("get target: %s from %s\n", object, v.name) .
+		if v.name == object {
+			return &v
 		}
-	case "B":
-		if expo > 240 {
-			t.B++
-			t.Bexpo = expo
-		} else {
-			t.B1++
-			t.B1expo = expo
-		}
-	case "S":
-		t.S++
-		t.Sexpo = expo
-	case "H":
-		t.H++
-		t.Hexpo = expo
-	case "O":
-		t.O++
-		t.Oexpo = expo
+	}
+	return nil
+}
+
+// Constructors .
+
+func newObject(target string) *Object {
+	return &Object{
+		name:    strings.Split(target, "~")[0],
+		targets: targetList,
+	}
+}
+
+func newTarget(target string, targetRotation int) *Target {
+	result := strings.Split(target, "~")
+	targetName := result[0]
+	targetTemperature, _ := strconv.Atoi(result[1])
+	targetExposition, _ := strconv.Atoi(result[2])
+	return &Target{
+		tuple: target,
+		name:  targetName,
+		temp:  targetTemperature,
+		expo:  targetExposition,
+		rot:   targetRotation,
+		fltr: Filters{
+			L: 0,
+			R: 0,
+			G: 0,
+			B: 0,
+			S: 0,
+			H: 0,
+			O: 0,
+		},
 	}
 }
