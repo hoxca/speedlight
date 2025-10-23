@@ -6,16 +6,18 @@ import (
 	"path/filepath"
 )
 
-// var logFatal = log.Fatal
+var logFatal = log.Fatal
 
 var (
-	lightsdir = flag.String("dir", "D:/Data/Voyager/Lights/", "lights directory")
-	verbosity = flag.String("level", "warn", "set log level of speedlight default warn")
-	rotUnused = flag.Bool("rotation", true, "tell if rotation is used")
+	lightsdir   = flag.String("dir", "D:/Data/Voyager/Lights/", "lights directory")
+	verbosity   = flag.String("level", "warn", "set log level of speedlight default warn")
+	rotUnused   = flag.Bool("rotation", true, "tell if rotation is used")
+	writeReport = flag.Bool("report", true, "write report to the filesystem")
 )
 
 func main() {
-	// writeConfig := writeDestination{true, true} .
+	writeConfig := writeDestination{true, *writeReport}
+
 	flag.Parse()
 	setUpLogs()
 
@@ -23,6 +25,5 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	objectList.printObjects()
-	// targetList.printObjects(writeConfig) .
+	objectList.printObjects(writeConfig)
 }
