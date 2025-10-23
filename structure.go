@@ -23,13 +23,13 @@ type Target struct {
 	name  string
 	temp  int
 	expo  int
-	rot   int
 	fltr  Filters
 }
 
 type Object struct {
-	name    string
-	targets map[string]Target
+	name     string
+	rotation int
+	targets  map[string]Target
 }
 
 type Objects map[string]Object
@@ -46,7 +46,7 @@ func addTarget(target string, rotation int) *Object {
 	targetName := result[0]
 	if !objectList.exist(targetName) {
 		Log.Debugf("create object %s", targetName)
-		o = newObject(target)
+		o = newObject(target, rotation)
 		objectList.set(targetName, o)
 		// Log.Debugf("target Object: %q\n", o) .
 	}
@@ -56,7 +56,7 @@ func addTarget(target string, rotation int) *Object {
 
 	if !targetList.exist(target) {
 		Log.Debugf("create target: %s", target)
-		t = newTarget(target, rotation)
+		t = newTarget(target)
 		o.setTarget(target, t)
 		return o
 	}
@@ -154,14 +154,15 @@ func (os *Objects) getObject(object string) *Object {
 
 // Constructors .
 
-func newObject(target string) *Object {
+func newObject(target string, targetRotation int) *Object {
 	return &Object{
-		name:    strings.Split(target, "~")[0],
-		targets: targetList,
+		name:     strings.Split(target, "~")[0],
+		rotation: targetRotation,
+		targets:  targetList,
 	}
 }
 
-func newTarget(target string, targetRotation int) *Target {
+func newTarget(target string) *Target {
 	result := strings.Split(target, "~")
 	targetName := result[0]
 	targetTemperature, _ := strconv.Atoi(result[1])
@@ -171,7 +172,6 @@ func newTarget(target string, targetRotation int) *Target {
 		name:  targetName,
 		temp:  targetTemperature,
 		expo:  targetExposition,
-		rot:   targetRotation,
 		fltr: Filters{
 			L: 0,
 			R: 0,

@@ -14,7 +14,11 @@ type writeDestination struct {
 }
 
 func (o *Object) printObject() {
-	fmt.Printf("Object name: %s\n", o.name)
+	if o.rotation == 666 {
+		fmt.Printf("Object name: %-38s %-9s Rotation: N/A\n", o.name, " ")
+	} else {
+		fmt.Printf("Object name: %-38s %-10s Rotation:%-3d°\n", o.name, " ", o.rotation)
+	}
 	ts := o.targets
 	for _, v := range ts {
 		fmt.Println()
@@ -53,7 +57,11 @@ func (o *Object) printObject() {
 }
 
 func (o *Object) fprintObject(buff io.Writer) {
-	fmt.Fprintf(buff, "Object name: %s\n", o.name)
+	if o.rotation == 666 {
+		fmt.Fprintf(buff, "Object name: %-38s %-9s Rotation: N/A\n", o.name, " ")
+	} else {
+		fmt.Fprintf(buff, "Object name: %-38s %-10s Rotation:%-3d°\n", o.name, " ", o.rotation)
+	}
 	ts := o.targets
 	for _, v := range ts {
 		fmt.Fprintln(buff)
