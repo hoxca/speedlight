@@ -11,8 +11,8 @@ Speedlight should evolve to a simple grader to avoid counting the bad lights in 
 
 Usage of ./bin/speedlight:
 
-  -dir string       lights directory (default "D:/Data/Voyager/Lights/")
-  -level string     set log level of speedlight default warn (default "warn")
-  -report           write report to the filesystem (default true)
-  -rotation         tell if rotation is used (default true)
+&nbsp;&nbsp;&nbsp;-dir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;&nbsp;lights directory (default "D:/Data/Voyager/Lights/") <br/>
+&nbsp;&nbsp;&nbsp;-level&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;  set log level of speedlight default warn (default "warn")<br/>
+&nbsp;&nbsp;&nbsp;-report&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;&nbsp; write report to the filesystem (default true)<br/>
+&nbsp;&nbsp;&nbsp;-rotation bool&nbsp;&nbsp; tell if rotation is used (default true)<br/>
 
