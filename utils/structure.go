@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"sort"
@@ -35,7 +35,7 @@ type Object struct {
 type Objects map[string]Object
 type Targets map[string]Target
 
-var objectList = Objects{}
+var ObjectList = Objects{}
 var targetList = Targets{}
 var t *Target
 var o *Object
@@ -44,13 +44,13 @@ func addTarget(target string, rotation int) *Object {
 	targetList = Targets{}
 	result := strings.Split(target, "~")
 	targetName := result[0]
-	if !objectList.exist(targetName) {
+	if !ObjectList.exist(targetName) {
 		Log.Debugf("create object %s", targetName)
 		o = newObject(target, rotation)
-		objectList.set(targetName, o)
+		ObjectList.set(targetName, o)
 		// Log.Debugf("target Object: %q\n", o) .
 	}
-	o = objectList.getObject(targetName)
+	o = ObjectList.getObject(targetName)
 	targetList = o.targets
 	// Log.Debugf("targetList %q for Object Name: %s", targetList, o.name) .
 

@@ -1,12 +1,12 @@
-package main
+package utils
 
 import Log "github.com/apatters/go-conlog"
 
-func setUpLogs() {
+func SetUpLogs(verbosity string) {
 	formatter := Log.NewStdFormatter()
 	formatter.Options.LogLevelFmt = Log.LogLevelFormatLongTitle
 	Log.SetFormatter(formatter)
-	switch *verbosity {
+	switch verbosity {
 	case "debug":
 		Log.SetLevel(Log.DebugLevel)
 	case "info":
