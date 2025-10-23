@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"bufio"
@@ -8,10 +8,12 @@ import (
 	"os"
 )
 
-type writeDestination struct {
-	writeToConsole bool
-	writeToFile    bool
+type WriteDestination struct {
+	WriteToConsole bool
+	WriteToFile    bool
 }
+
+var Wdest WriteDestination
 
 func (o *Object) printObject() {
 	if o.rotation == 666 {
@@ -99,10 +101,10 @@ func (o *Object) fprintObject(buff io.Writer) {
 	}
 }
 
-func (obs *Objects) printObjects(wdest writeDestination) {
-	objects := obs.getObjects()
+func (obs *Objects) PrintObjects(Lightsdir string) {
 
-	if wdest.writeToConsole {
+	objects := obs.getObjects()
+	if Wdest.WriteToConsole {
 		fmt.Printf("Targets list: %q\n\n", objects)
 		for _, v := range *obs {
 			fmt.Println()
@@ -111,8 +113,8 @@ func (obs *Objects) printObjects(wdest writeDestination) {
 		fmt.Println()
 	}
 
-	if wdest.writeToFile {
-		dest := fmt.Sprintf("%s/Lights_Report.txt", *lightsdir)
+	if Wdest.WriteToFile {
+		dest := fmt.Sprintf("%s/Lights_Report.txt", Lightsdir)
 		report, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 		if err != nil {
 			logFatal(err)
