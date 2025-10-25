@@ -1,39 +1,53 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
 	"fmt"
+	"log"
+	"path/filepath"
+
+	"speedlight/utils"
 
 	"github.com/spf13/cobra"
 )
 
-// flatsCmd represents the flats command
-var flatsCmd = &cobra.Command{
-	Use:   "flats",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+var (
+	targetNumber int
+)
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+// flatsCmd get the target list of filters
+var filtersCmd = &cobra.Command{
+	Use:   "filters",
+	Short: "Get the target list of filters",
+	Long:  `Get the list of filters used for this target during the last acquisition night`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("flats called")
+
+		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
+
+		targetNumber--
+		utils.SetUpLogs(verbosity)
+		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
+
+		utils.RotUsed, _ = cmd.Flags().GetBool("rotation")
+		err := filepath.Walk(lightsdir, utils.Flatsversal)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if !rotation {
+			fmt.Println(utils.FlatList[666])
+
+		} else {
+			if utils.Wdest.WriteToConsole {
+				fltrs := utils.FlatList[utils.Rotations[targetNumber]]
+				fmt.Println(fltrs)
+			}
+		}
+
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(flatsCmd)
+	rootCmd.AddCommand(filtersCmd)
+	filtersCmd.Flags().IntVar(&targetNumber, "target", 1, "night target number, between 1 and 3")
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// flatsCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// flatsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
