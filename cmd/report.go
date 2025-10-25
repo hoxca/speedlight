@@ -32,22 +32,8 @@ it will sum time exposure by target and temperature.`,
 	},
 }
 
-var (
-	lightsdir    string
-	writeConsole bool
-	writeReport  bool
-	rotation     bool
-	verbosity    string
-)
-
 func init() {
 
 	rootCmd.AddCommand(reportCmd)
-
-	reportCmd.PersistentFlags().StringVar(&lightsdir, "dir", "D:/Data/Voyager/Lights/", "lights directory")
-	reportCmd.Flags().BoolVar(&writeConsole, "console", true, "write report to the console")
-	reportCmd.Flags().BoolVar(&writeReport, "report", false, "write report to the filesystem")
-	reportCmd.PersistentFlags().BoolVar(&rotation, "rotation", false, "manage rotation in lights report")
-	reportCmd.PersistentFlags().StringVar(&verbosity, "level", "warn", "set log level")
 
 }
