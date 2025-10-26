@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 
 	"speedlight/utils"
 
@@ -17,7 +18,8 @@ var rotationCmd = &cobra.Command{
 	Short: "Get the target rotation",
 	Long:  `Get the rotation used by the target during last acquisition night`,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		lightsdir, _ = strings.CutSuffix(lightsdir, "/")
+		lightsdir, _ = strings.CutSuffix(lightsdir, "\\")
 		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
 		targetNumber--
