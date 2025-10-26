@@ -7,6 +7,7 @@ import (
 
 	"speedlight/utils"
 
+	Log "github.com/apatters/go-conlog"
 	"github.com/spf13/cobra"
 )
 
@@ -33,13 +34,16 @@ var filtersCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if !rotation {
-			fmt.Println(utils.FlatList[666])
+		Log.Debugf("Number of targets detected: %d", len(utils.Rotations))
+		if targetNumber < len(utils.Rotations) {
+			if !rotation {
+				fmt.Println(utils.FlatList[666])
 
-		} else {
-			if utils.Wdest.WriteToConsole {
-				fltrs := utils.FlatList[utils.Rotations[targetNumber]]
-				fmt.Println(fltrs)
+			} else {
+				if utils.Wdest.WriteToConsole {
+					fltrs := utils.FlatList[utils.Rotations[targetNumber]]
+					fmt.Println(fltrs)
+				}
 			}
 		}
 
