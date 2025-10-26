@@ -26,9 +26,8 @@ var Flatsversal filepath.WalkFunc = func(fp string, fi os.FileInfo, err error) e
 		rootp = path
 	}
 	i = false
-	// layout := "2006-01-02 15:04:05 +0200 CEST"
 
-	var cutoff = 48 * time.Hour
+	var cutoff = time.Duration(TimeFrame) * time.Hour
 
 	image := strings.TrimPrefix(path, rootp)
 	if runtime.GOOS == "windows" {
