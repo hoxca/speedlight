@@ -27,7 +27,11 @@ var filtersCmd = &cobra.Command{
 		lightsdir, _ = strings.CutSuffix(lightsdir, "\\")
 		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
-		targetNumber--
+		if targetNumber == 0 {
+			rotation = false
+		} else {
+			targetNumber--
+		}
 		utils.SetUpLogs(verbosity)
 		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
@@ -55,6 +59,5 @@ var filtersCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(filtersCmd)
-	filtersCmd.Flags().IntVar(&targetNumber, "target", 1, "night target number, between 1 and 3")
-
+	filtersCmd.Flags().IntVar(&targetNumber, "target", 0, "night target number, between 1 and 3")
 }

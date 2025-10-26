@@ -22,20 +22,23 @@ var rotationCmd = &cobra.Command{
 		lightsdir, _ = strings.CutSuffix(lightsdir, "\\")
 		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
-		targetNumber--
-		utils.SetUpLogs(verbosity)
-		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
+		if targetNumber != 0 {
+			targetNumber--
 
-		utils.RotUsed, _ = cmd.Flags().GetBool("rotation")
-		err := filepath.Walk(lightsdir, utils.Flatsversal)
-		if err != nil {
-			log.Fatal(err)
-		}
+			utils.SetUpLogs(verbosity)
+			utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
-		Log.Debugf("Number of targets detected: %d", len(utils.Rotations))
-		if targetNumber < len(utils.Rotations) {
-			if utils.Wdest.WriteToConsole {
-				fmt.Println(utils.Rotations[targetNumber])
+			utils.RotUsed, _ = cmd.Flags().GetBool("rotation")
+			err := filepath.Walk(lightsdir, utils.Flatsversal)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			Log.Debugf("Number of targets detected: %d", len(utils.Rotations))
+			if targetNumber < len(utils.Rotations) {
+				if utils.Wdest.WriteToConsole {
+					fmt.Println(utils.Rotations[targetNumber])
+				}
 			}
 		}
 	},
@@ -43,6 +46,6 @@ var rotationCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(rotationCmd)
-	rotationCmd.Flags().IntVar(&targetNumber, "target", 1, "night target number, between 1 and 3")
+	rotationCmd.Flags().IntVar(&targetNumber, "target", 0, "night target number, between 1 and 3")
 
 }

@@ -9,6 +9,8 @@ var Rotations []float32
 
 var flt *Filters
 
+var TimeFrame int
+
 func addFlats(rotation float32, filter string) {
 	if !FlatList.exist(rotation) {
 		flt = newFlat()
