@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 
 	"speedlight/utils"
 
@@ -22,6 +23,8 @@ var filtersCmd = &cobra.Command{
 	Long:  `Get the list of filters used for this target during the last acquisition night`,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		lightsdir, _ = strings.CutSuffix(lightsdir, "/")
+		lightsdir, _ = strings.CutSuffix(lightsdir, "\\")
 		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
 		targetNumber--

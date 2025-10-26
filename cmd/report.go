@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
 	"speedlight/utils"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -19,6 +21,10 @@ produced by your voyager astronomy orchestrator
 
 it will sum time exposure by target and temperature.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		lightsdir, _ = strings.CutSuffix(lightsdir, "/")
+		lightsdir, _ = strings.CutSuffix(lightsdir, "\\")
+		fmt.Println("Scanning lights directory: " + lightsdir + "\n")
 
 		utils.SetUpLogs(verbosity)
 		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
