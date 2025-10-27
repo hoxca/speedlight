@@ -67,12 +67,15 @@ func initConfig() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		confdir := fmt.Sprintf("%s/conf", dir)
 		// we came from bin directory
 		confdir1 := fmt.Sprintf("%s/../conf", dir)
+		confdir2 := "./conf"
 		// Search yaml config file in program path with name "speedlight.yaml".
 		viper.AddConfigPath(confdir)
 		viper.AddConfigPath(confdir1)
+		viper.AddConfigPath(confdir2)
 		viper.AddConfigPath(dir)
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("speedlight")
