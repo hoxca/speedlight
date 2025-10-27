@@ -17,6 +17,8 @@ var i = true
 var rootp string
 var now = time.Now()
 
+var Regex string
+
 var Flatsversal filepath.WalkFunc = func(fp string, fi os.FileInfo, err error) error {
 	if err != nil {
 		return err
@@ -42,8 +44,7 @@ var Flatsversal filepath.WalkFunc = func(fp string, fi os.FileInfo, err error) e
 
 			Log.Debugf("image: %s", image)
 
-			regex := `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.[[:digit:]]{2})_[EW]\.FIT`
-			re := *regexp.MustCompilePOSIX(regex)
+			re := *regexp.MustCompilePOSIX(Regex)
 			splitline := re.FindAllStringSubmatch(image, -1)
 
 			if len(splitline) == 1 {
@@ -73,7 +74,7 @@ var Traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) erro
 	if err != nil {
 		return err
 	}
-	// fmt.Printf("%q\n", fi.ModTime())
+
 	path := filepath.ToSlash(fp)
 	if i {
 		rootp = path
@@ -81,18 +82,24 @@ var Traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) erro
 	i = false
 
 	image := strings.TrimPrefix(path, rootp)
-	if runtime.GOOS == "windows" {
-		image = fmt.Sprintf("/%s", image)
-	} else {
+	/*
+		if runtime.GOOS == "windows" {
+			image = fmt.Sprintf("/%s", image)
+		} else {
 
-		image = fmt.Sprintf("%s", image)
-	}
+			image = fmt.Sprintf("%s", image)
+		}
+	*/
+	image = fmt.Sprintf("%s", image)
 	Log.Debugf("image: %s\n", image)
 
 	// Initial Kosmodrom file pattern: CR399_LIGHT_L_600s_BIN1_-20C_002_20221015_222558_734_E .
+	// regex := `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_[[:digit:]]{3}_[[:digit:]]{8}_[[:digit:]]{6}_([[:digit:]]{3})_[EW]*.*\.FIT` .
 
-	regex := `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_[[:digit:]]{3}_[[:digit:]]{8}_[[:digit:]]{6}_([[:digit:]]{3})_[EW]*.*\.FIT`
-	re := *regexp.MustCompilePOSIX(regex)
+	// New nomenclature: NGC7635_LIGHT_H_180s_BIN1_5C_GA2750_20251023_233348_235_PA239.88_W
+	// regex := `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.[[:digit:]]{2})_[EW]\.FIT` .
+
+	re := *regexp.MustCompilePOSIX(Regex)
 	splitline := re.FindAllStringSubmatch(image, -1)
 
 	if len(splitline) == 1 {
@@ -100,7 +107,9 @@ var Traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) erro
 		filter := splitline[0][2]
 		expo, _ := strconv.Atoi(splitline[0][3])
 		temperature, _ := strconv.Atoi(splitline[0][4])
-		rotation, _ := strconv.Atoi(splitline[0][5])
+		rotval, _ := strconv.ParseFloat(splitline[0][5], 32)
+		rotation := float32(rotval)
+
 		if !RotUsed {
 			rotation = 666
 		}

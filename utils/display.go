@@ -19,7 +19,7 @@ func (o *Object) printObject() {
 	if o.rotation == 666 {
 		fmt.Printf("Object name: %-38s %-9s Rotation: N/A\n", o.name, " ")
 	} else {
-		fmt.Printf("Object name: %-38s %-10s Rotation:%-3d°\n", o.name, " ", o.rotation)
+		fmt.Printf("Object name: %-38s %-7s Rotation:%-3.2f°\n", o.name, " ", o.rotation)
 	}
 	ts := o.targets
 	for _, v := range ts {

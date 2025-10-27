@@ -108,5 +108,7 @@ func manageDefault() {
 		verbosity = viper.GetString("level")
 	}
 	utils.TimeFrame = viper.GetInt("time_frame")
+	utils.Regex = viper.GetString("regexp")
+	Log.Debugf("regex: %s\n", utils.Regex)
 
 }

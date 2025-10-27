@@ -28,7 +28,7 @@ type Target struct {
 
 type Object struct {
 	name     string
-	rotation int
+	rotation float32
 	targets  map[string]Target
 }
 
@@ -40,7 +40,7 @@ var targetList = Targets{}
 var t *Target
 var o *Object
 
-func addTarget(target string, rotation int) *Object {
+func addTarget(target string, rotation float32) *Object {
 	targetList = Targets{}
 	result := strings.Split(target, "~")
 	targetName := result[0]
@@ -154,7 +154,7 @@ func (os *Objects) getObject(object string) *Object {
 
 // Constructors .
 
-func newObject(target string, targetRotation int) *Object {
+func newObject(target string, targetRotation float32) *Object {
 	return &Object{
 		name:     strings.Split(target, "~")[0],
 		rotation: targetRotation,
