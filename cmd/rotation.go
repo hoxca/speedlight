@@ -39,7 +39,11 @@ var rotationCmd = &cobra.Command{
 				if utils.Wdest.WriteToConsole {
 					fmt.Println(utils.Rotations[targetNumber])
 				}
+			} else {
+				fmt.Println(-1)
 			}
+		} else {
+			fmt.Println(-1)
 		}
 	},
 }
