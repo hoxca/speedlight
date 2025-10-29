@@ -12,6 +12,12 @@ import (
 
 var wdest utils.WriteDestination
 
+var (
+	writeConsole bool
+	writeReport  bool
+	rotation     bool
+)
+
 // reportCmd represents the report command
 var reportCmd = &cobra.Command{
 	Use:   "report",
@@ -41,5 +47,9 @@ it will sum time exposure by target and temperature.`,
 func init() {
 
 	rootCmd.AddCommand(reportCmd)
+
+	reportCmd.Flags().BoolVar(&writeConsole, "console", true, "write report to the console")
+	reportCmd.Flags().BoolVar(&writeReport, "report", true, "write report to the filesystem")
+	reportCmd.Flags().BoolVar(&rotation, "rotation", true, "manage rotation in lights report")
 
 }

@@ -31,9 +31,6 @@ var (
 	cfgFile         string
 	cfgFileNotFound = false
 	lightsdir       string
-	writeConsole    bool
-	writeReport     bool
-	rotation        bool
 	verbosity       string
 )
 
@@ -52,10 +49,7 @@ func init() {
 
 func initConfig() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is conf/speedlight.yaml)")
-	rootCmd.PersistentFlags().BoolVar(&writeConsole, "console", true, "write report to the console")
-	rootCmd.PersistentFlags().BoolVar(&writeReport, "report", true, "write report to the filesystem")
 	rootCmd.PersistentFlags().StringVar(&lightsdir, "dir", "", "lights directory")
-	rootCmd.PersistentFlags().BoolVar(&rotation, "rotation", true, "manage rotation in lights report")
 	rootCmd.PersistentFlags().StringVar(&verbosity, "level", "", "set log level")
 
 	if cfgFile != "" {
