@@ -101,3 +101,51 @@ Global Flags:
       --dir string      lights directory
       --level string    set log level
 ```
+
+# in practice
+
+```
+hugh⨕shupo:speedlight [ main | ✔  ]|● ./bin/speedlight report
+Scanning lights directory: /Volumes/Dyno/Kosmodrom/Lights
+
+Targets list: ["NGC1333" "NGC6960" "NGC7635"]
+
+
+Object name: NGC1333                                        Rotation:274.00°
+
+-10°C                                   Total:00 hour  15 minutes 00 second
+R	    Nb:    3        Expo:  180s	    Subs: 00 hour  09 minutes 00 second
+G	    Nb:    1	    Expo:  180s	    Subs: 00 hour  03 minutes 00 second
+B	    Nb:    1	    Expo:  180s	    Subs: 00 hour  03 minutes 00 second
+
+Object name: NGC6960                                        Rotation:285.00°
+
+-10°C                                   Total:00 hour  06 minutes 00 second
+L	    Nb:    1	    Expo:  180s	    Subs: 00 hour  03 minutes 00 second
+H	    Nb:    1	    Expo:  180s	    Subs: 00 hour  03 minutes 00 second
+
+Object name: NGC7635                                        Rotation:239.88°
+
+-10°C                                   Total:00 hour  18 minutes 00 second
+S	    Nb:    2	    Expo:  180s	    Subs: 00 hour  06 minutes 00 second
+H	    Nb:    2	    Expo:  180s	    Subs: 00 hour  06 minutes 00 second
+O	    Nb:    2	    Expo:  180s	    Subs: 00 hour  06 minutes 00 second
+
+hugh⨕shupo:speedlight [ main | ✔  ]|● ./bin/speedlight rotation
+-1
+hugh⨕shupo:speedlight [ main | ✔  ]|● ./bin/speedlight rotation --target=1
+274
+hugh⨕shupo:speedlight [ main | ✔  ]|● ./bin/speedlight rotation --target=2
+285
+hugh⨕shupo:speedlight [ main | ✔  ]|● ./bin/speedlight rotation --target=3
+239.88
+hugh⨕shupo:speedlight [ main | ✔  ]|● ./bin/speedlight filters
+LRGBSHO
+hugh⨕shupo:speedlight [ main | ✔  ]|● ./bin/speedlight filters --target=1
+RGB
+hugh⨕shupo:speedlight [ main | ✔  ]|● ./bin/speedlight filters --target=2
+LH
+hugh⨕shupo:speedlight [ main | ✔  ]|● ./bin/speedlight filters --target=3
+SHO
+```
+
