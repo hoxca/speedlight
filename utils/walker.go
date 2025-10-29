@@ -82,14 +82,7 @@ var Traversal filepath.WalkFunc = func(fp string, _ os.FileInfo, err error) erro
 	i = false
 
 	image := strings.TrimPrefix(path, rootp)
-	/*
-		if runtime.GOOS == "windows" {
-			image = fmt.Sprintf("/%s", image)
-		} else {
 
-			image = fmt.Sprintf("%s", image)
-		}
-	*/
 	image = fmt.Sprintf("%s", image)
 	Log.Debugf("image: %s\n", image)
 

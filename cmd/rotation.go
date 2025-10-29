@@ -20,15 +20,13 @@ var rotationCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		lightsdir, _ = strings.CutSuffix(lightsdir, "/")
 		lightsdir, _ = strings.CutSuffix(lightsdir, "\\")
-		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
 		if targetNumber != 0 {
 			targetNumber--
 
 			utils.SetUpLogs(verbosity)
-			utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
-			utils.RotUsed, _ = cmd.Flags().GetBool("rotation")
+			utils.RotUsed = true
 			err := filepath.Walk(lightsdir, utils.Flatsversal)
 			if err != nil {
 				log.Fatal(err)
@@ -36,9 +34,7 @@ var rotationCmd = &cobra.Command{
 
 			Log.Debugf("Number of targets detected: %d", len(utils.Rotations))
 			if targetNumber < len(utils.Rotations) {
-				if utils.Wdest.WriteToConsole {
-					fmt.Println(utils.Rotations[targetNumber])
-				}
+				fmt.Println(utils.Rotations[targetNumber])
 			} else {
 				fmt.Println(-1)
 			}

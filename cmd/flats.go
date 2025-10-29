@@ -25,17 +25,15 @@ var filtersCmd = &cobra.Command{
 
 		lightsdir, _ = strings.CutSuffix(lightsdir, "/")
 		lightsdir, _ = strings.CutSuffix(lightsdir, "\\")
-		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
+		utils.RotUsed = true
 		if targetNumber == 0 {
-			rotation = false
+			utils.RotUsed = false
 		} else {
 			targetNumber--
 		}
 		utils.SetUpLogs(verbosity)
-		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
 
-		utils.RotUsed, _ = cmd.Flags().GetBool("rotation")
 		err := filepath.Walk(lightsdir, utils.Flatsversal)
 		if err != nil {
 			log.Fatal(err)
@@ -43,14 +41,12 @@ var filtersCmd = &cobra.Command{
 
 		Log.Debugf("Number of targets detected: %d", len(utils.Rotations))
 		if targetNumber < len(utils.Rotations) {
-			if !rotation {
+			if !utils.RotUsed {
 				fmt.Println(utils.FlatList[666])
 
 			} else {
-				if utils.Wdest.WriteToConsole {
-					fltrs := utils.FlatList[utils.Rotations[targetNumber]]
-					fmt.Println(fltrs)
-				}
+				fltrs := utils.FlatList[utils.Rotations[targetNumber]]
+				fmt.Println(fltrs)
 			}
 		}
 
