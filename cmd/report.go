@@ -10,8 +10,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var wdest utils.WriteDestination
-
 var (
 	writeConsole bool
 	writeReport  bool
@@ -33,7 +31,7 @@ it will sum time exposure by target and temperature.`,
 		fmt.Println("Scanning lights directory: " + lightsdir + "\n")
 
 		utils.SetUpLogs(verbosity)
-		utils.Wdest = utils.WriteDestination{writeConsole, writeReport}
+		utils.Wdest.SetWriteDestination(writeConsole, writeReport)
 
 		utils.RotUsed, _ = cmd.Flags().GetBool("rotation")
 		err := filepath.Walk(lightsdir, utils.Traversal)

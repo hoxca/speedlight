@@ -1,5 +1,6 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
+Package cmd for speedlight
+Copyright © 2025 hoxca <hugh@atosc.org>
 */
 package cmd
 

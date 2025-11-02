@@ -1,3 +1,7 @@
+/*
+Package utils for speedlight
+manage all speedlight datastructure
+*/
 package utils
 
 import (
@@ -14,6 +18,11 @@ type WriteDestination struct {
 }
 
 var Wdest WriteDestination
+
+func (w *WriteDestination) SetWriteDestination(writeConsole bool, writeReport bool) {
+	w.WriteToConsole = writeConsole
+	w.WriteToFile = writeReport
+}
 
 func (o *Object) printObject() {
 	if o.rotation == 666 {
@@ -62,7 +71,7 @@ func (o *Object) fprintObject(buff io.Writer) {
 	if o.rotation == 666 {
 		fmt.Fprintf(buff, "Object name: %-38s %-9s Rotation: N/A\n", o.name, " ")
 	} else {
-		fmt.Fprintf(buff, "Object name: %-38s %-10s Rotation:%-3d°\n", o.name, " ", o.rotation)
+		fmt.Fprintf(buff, "Object name: %-38s %-7s Rotation:%-3.2f°\n", o.name, " ", o.rotation)
 	}
 	ts := o.targets
 	for _, v := range ts {
