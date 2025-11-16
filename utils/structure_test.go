@@ -288,6 +288,18 @@ func TestObjectsGetObjects(t *testing.T) {
 			},
 			expected: []string{"M42"},
 		},
+		{
+			name: "astronomical objects with numeric postfixes",
+			objects: Objects{
+				"M42":   *createTestObject("M42", 45.5),
+				"M5":    *createTestObject("M5", 30.0),
+				"M31":   *createTestObject("M31", 60.0),
+				"NGC1":  *createTestObject("NGC1", 20.0),
+				"NGC10": *createTestObject("NGC10", 25.0),
+				"NGC2":  *createTestObject("NGC2", 22.0),
+			},
+			expected: []string{"M5", "M31", "M42", "NGC1", "NGC2", "NGC10"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -383,6 +395,73 @@ func TestObjectsGetObject(t *testing.T) {
 			result := tt.objects.getObject(tt.key)
 			if !reflect.DeepEqual(result, tt.expected) {
 				t.Errorf("Objects.getObject() = %+v, expected %+v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestCompareAstronomicalNames(t *testing.T) {
+	tests := []struct {
+		name     string
+		a        string
+		b        string
+		expected bool
+	}{
+		{
+			name:     "M objects numeric sorting",
+			a:        "M5",
+			b:        "M42",
+			expected: true,
+		},
+		{
+			name:     "M objects reverse numeric sorting",
+			a:        "M42",
+			b:        "M5",
+			expected: false,
+		},
+		{
+			name:     "NGC objects numeric sorting",
+			a:        "NGC1",
+			b:        "NGC10",
+			expected: true,
+		},
+		{
+			name:     "different prefixes",
+			a:        "M42",
+			b:        "NGC1",
+			expected: true, // "M" < "NGC" alphabetically
+		},
+		{
+			name:     "same prefix no numbers",
+			a:        "Andromeda",
+			b:        "Andromeda",
+			expected: false,
+		},
+		{
+			name:     "one with number one without",
+			a:        "M42",
+			b:        "Andromeda",
+			expected: false, // "Andromeda" < "M42" alphabetically
+		},
+		{
+			name:     "empty numeric parts",
+			a:        "M",
+			b:        "M42",
+			expected: true,
+		},
+		{
+			name:     "complex names fallback",
+			a:        "Test-Object",
+			b:        "Test_Object",
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := compareAstronomicalNames(tt.a, tt.b)
+			if result != tt.expected {
+				t.Errorf("compareAstronomicalNames(%q, %q) = %v, expected %v", tt.a, tt.b, result, tt.expected)
 			}
 		})
 	}

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -39,6 +40,48 @@ type Targets map[string]Target
 type by func(t1, t2 *Target) bool
 
 var RotUsed bool
+
+// compareAstronomicalNames compares astronomical object names with proper numeric sorting
+// for postfix numbers (e.g., M42 comes after M5, not before)
+func compareAstronomicalNames(a, b string) bool {
+	// Extract prefix and numeric parts - more flexible pattern
+	re := regexp.MustCompile(`^([A-Za-z]+)(\d*)$`)
+	aMatch := re.FindStringSubmatch(a)
+	bMatch := re.FindStringSubmatch(b)
+
+	// If both match the pattern, compare by prefix then numerically
+	if len(aMatch) == 3 && len(bMatch) == 3 {
+		// Compare prefixes first
+		if aMatch[1] != bMatch[1] {
+			return aMatch[1] < bMatch[1]
+		}
+
+		// Compare numeric parts
+		aNum := aMatch[2]
+		bNum := bMatch[2]
+
+		// Handle empty numeric parts
+		if aNum == "" && bNum == "" {
+			return a < b
+		}
+		if aNum == "" {
+			return true // no number comes before number
+		}
+		if bNum == "" {
+			return false // number comes after no number
+		}
+
+		// Convert to integers and compare
+		aInt, errA := strconv.Atoi(aNum)
+		bInt, errB := strconv.Atoi(bNum)
+		if errA == nil && errB == nil {
+			return aInt < bInt
+		}
+	}
+
+	// Fallback to string comparison
+	return a < b
+}
 
 var ObjectList = Objects{}
 var targetList = Targets{}
@@ -133,7 +176,9 @@ func (obs *Objects) getObjects() []string {
 	for _, v := range *obs {
 		ret = append(ret, v.name)
 	}
-	sort.Strings(ret)
+	sort.Slice(ret, func(i, j int) bool {
+		return compareAstronomicalNames(ret[i], ret[j])
+	})
 	return ret
 }
 
