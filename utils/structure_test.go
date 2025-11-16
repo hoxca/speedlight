@@ -345,6 +345,8 @@ func TestTargetsGetTarget(t *testing.T) {
 
 func TestObjectsGetObject(t *testing.T) {
 	obj := createTestObject("M42", 45.5)
+	expectedObj := createTestObject("M42", 45.5)
+	expectedObj.SortBy = "M42"
 	objects := Objects{
 		"M42":     *obj,
 		"NGC7635": *createTestObject("NGC7635", 123.0),
@@ -360,7 +362,7 @@ func TestObjectsGetObject(t *testing.T) {
 			name:     "existing object",
 			objects:  objects,
 			key:      "M42",
-			expected: obj,
+			expected: expectedObj,
 		},
 		{
 			name:     "non-existing object",

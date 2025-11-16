@@ -32,7 +32,7 @@ func (o *Object) printObject() {
 	} else {
 		fmt.Printf("Object name: %-38s %-7s Rotation:%-3.2f°\n", o.name, " ", o.rotation)
 	}
-	ts := o.targets
+	ts := o.getTargets()
 	for _, v := range ts {
 		fmt.Println()
 		fmt.Printf("%d°C%-34s Total:%s",
@@ -75,7 +75,7 @@ func (o *Object) fprintObject(buff io.Writer) {
 	} else {
 		fmt.Fprintf(buff, "Object name: %-38s %-7s Rotation:%-3.2f°\n", o.name, " ", o.rotation)
 	}
-	ts := o.targets
+	ts := o.getTargets()
 	for _, v := range ts {
 		fmt.Fprintln(buff)
 		fmt.Fprintf(buff, "%d°C%-34s Total:%s",
@@ -117,7 +117,8 @@ func (obs *Objects) PrintObjects(Lightsdir string) {
 	objects := obs.getObjects()
 	if Wdest.WriteToConsole {
 		fmt.Printf("Targets list: %q\n\n", objects)
-		for _, v := range *obs {
+		for _, objectName := range objects {
+			v := obs.getObject(objectName)
 			fmt.Println()
 			v.printObject()
 		}
@@ -135,7 +136,8 @@ func (obs *Objects) PrintObjects(Lightsdir string) {
 		buff := bufio.NewWriter(report)
 		fmt.Fprintf(buff, "Targets list: %q\n\n", objects)
 
-		for _, v := range *obs {
+		for _, objectName := range objects {
+			v := obs.getObject(objectName)
 			fmt.Fprintln(buff)
 			v.fprintObject(buff)
 

@@ -30,10 +30,13 @@ type Object struct {
 	name     string
 	rotation float32
 	targets  map[string]Target
+	SortBy   string
 }
 
 type Objects map[string]Object
 type Targets map[string]Target
+
+type by func(t1, t2 *Target) bool
 
 var RotUsed bool
 
@@ -50,7 +53,7 @@ func addTarget(target string, rotation float32) *Object {
 		Log.Debugf("create object %s", targetName)
 		o = newObject(target, rotation)
 		ObjectList.set(targetName, o)
-		// Log.Debugf("target Object: %q\n", o) .
+		// Log.Debugf("target Object: %q ", o) .
 	}
 	o = ObjectList.getObject(targetName)
 	targetList = o.targets
@@ -99,16 +102,16 @@ func (t *Target) iterateFilter(filter string) {
 
 // Getters Setters .
 
-func (os Objects) set(key string, value *Object) {
-	os[key] = *value
+func (obs Objects) set(key string, value *Object) {
+	obs[key] = *value
 }
 
 func (o Object) setTarget(key string, value *Target) {
 	o.targets[key] = *value
 }
 
-func (os Objects) exist(key string) bool {
-	for k := range os {
+func (obs Objects) exist(key string) bool {
+	for k := range obs {
 		if k == key {
 			return true
 		}
@@ -125,13 +128,24 @@ func (ts Targets) exist(key string) bool {
 	return false
 }
 
-func (os *Objects) getObjects() []string {
+func (obs *Objects) getObjects() []string {
 	ret := []string{}
-	for _, v := range *os {
+	for _, v := range *obs {
 		ret = append(ret, v.name)
 	}
 	sort.Strings(ret)
 	return ret
+}
+
+func (o *Object) getTargets() []Target {
+	var targets []Target
+	for _, target := range o.targets {
+		targets = append(targets, target)
+	}
+	sort.Slice(targets, func(i, j int) bool {
+		return targets[i].tuple < targets[j].tuple
+	})
+	return targets
 }
 
 func (ts *Targets) getTarget(target string) *Target {
@@ -143,11 +157,12 @@ func (ts *Targets) getTarget(target string) *Target {
 	return nil
 }
 
-func (os *Objects) getObject(object string) *Object {
+func (obs *Objects) getObject(object string) *Object {
 	// Log.Debugf("Search for object: %s", object) .
-	for _, v := range *os {
-		// Log.Debugf("get target: %s from %s\n", object, v.name) .
+	for k, v := range *obs {
+		// Log.Debugf("get target: %s from %s ", object, v.name) .
 		if v.name == object {
+			v.SortBy = k
 			return &v
 		}
 	}
