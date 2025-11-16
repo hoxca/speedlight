@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -14,7 +15,7 @@ func TestTraversalRegexParsing(t *testing.T) {
 	ObjectList = Objects{}
 	targetList = Targets{}
 	RotUsed = true
-	Regex = `.*/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/([^/]+)/.*_LIGHT_([LRGBSHO]*)_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
 
 	tests := []struct {
 		name     string
@@ -23,27 +24,27 @@ func TestTraversalRegexParsing(t *testing.T) {
 	}{
 		{
 			name:     "valid new nomenclature file",
-			path:     "/data/2025-01-15/NGC7635/NGC7635_LIGHT_H_180s_BIN1_5C_GA2750_20250115_233348_235_PA239.88_W.FIT",
+			path:     "/NGC7635/2025-01-15/H/NGC7635_LIGHT_H_180s_BIN1_5C_GA2750_20250115_233348_235_PA239.88_W.FIT",
 			expected: true,
 		},
 		{
 			name:     "valid file with different filter",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
 			expected: true,
 		},
 		{
 			name:     "invalid file - wrong extension",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.TXT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.TXT",
 			expected: false,
 		},
 		{
 			name:     "invalid file - missing components",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C.FIT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C.FIT",
 			expected: false,
 		},
 		{
 			name:     "directory path",
-			path:     "/data/2025-01-15/M42",
+			path:     "/M42/2025-01-15/L",
 			expected: false,
 		},
 	}
@@ -96,7 +97,7 @@ func TestFlatsversalRegexParsing(t *testing.T) {
 	Rotations = []float32{}
 	RotUsed = true
 	TimeFrame = 24 // 24 hours to ensure files are within time window
-	Regex = `.*/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/([^/]+)/.*_LIGHT_([LRGBSHO]*)_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
 
 	tests := []struct {
 		name     string
@@ -105,17 +106,17 @@ func TestFlatsversalRegexParsing(t *testing.T) {
 	}{
 		{
 			name:     "valid new nomenclature file",
-			path:     "/data/2025-01-15/NGC7635/NGC7635_LIGHT_H_180s_BIN1_5C_GA2750_20250115_233348_235_PA239.88_W.FIT",
+			path:     "/NGC7635/2025-01-15/H/NGC7635_LIGHT_H_180s_BIN1_5C_GA2750_20250115_233348_235_PA239.88_W.FIT",
 			expected: true,
 		},
 		{
 			name:     "valid file with different filter",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
 			expected: true,
 		},
 		{
 			name:     "invalid file - wrong extension",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.TXT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.TXT",
 			expected: false,
 		},
 	}
@@ -163,7 +164,7 @@ func TestTimeFiltering(t *testing.T) {
 	Rotations = []float32{}
 	TimeFrame = 2 // 2 hours
 	RotUsed = true
-	Regex = `.*/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/([^/]+)/.*_LIGHT_([LRGBSHO]*)_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
 
 	tests := []struct {
 		name     string
@@ -173,19 +174,19 @@ func TestTimeFiltering(t *testing.T) {
 	}{
 		{
 			name:     "recent file within time frame",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
 			modTime:  time.Now().Add(-1 * time.Hour), // 1 hour ago
 			expected: true,
 		},
 		{
 			name:     "old file outside time frame",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
 			modTime:  time.Now().Add(-3 * time.Hour), // 3 hours ago
 			expected: false,
 		},
 		{
 			name:     "file exactly at time boundary",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
 			modTime:  time.Now().Add(-2 * time.Hour), // exactly 2 hours ago
 			expected: false,                          // diff < cutoff, so 2 hours is not less than 2 hours
 		},
@@ -240,7 +241,7 @@ func TestPathHandling(t *testing.T) {
 	ObjectList = Objects{}
 	targetList = Targets{}
 	RotUsed = true
-	Regex = `.*/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/([^/]+)/.*_LIGHT_([LRGBSHO]*)_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
 
 	tests := []struct {
 		name     string
@@ -249,26 +250,42 @@ func TestPathHandling(t *testing.T) {
 	}{
 		{
 			name:     "unix path",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
 			expected: "M42",
 		},
 		{
 			name:     "path with nested directory",
-			path:     "/very/long/path/to/data/2025-01-15/NGC7635/NGC7635_LIGHT_H_180s_BIN1_5C_GA2750_20250115_233348_235_PA239.88_W.FIT",
+			path:     "/very/long/path/to/NGC7635/2025-01-15/H/NGC7635_LIGHT_H_180s_BIN1_5C_GA2750_20250115_233348_235_PA239.88_W.FIT",
 			expected: "NGC7635",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Test the regex processing directly
-			image := tt.path // Use the full path for testing
+			// Simulate the path trimming that happens in walker.go
+			// The walker trims the root path, but keeps the object directory and date structure
+			parts := strings.Split(tt.path, "/")
+			var image string
+			if len(parts) >= 4 {
+				// Find the object name (usually before the date pattern)
+				for i := 1; i < len(parts); i++ {
+					// Look for date pattern YYYY-MM-DD
+					if i+1 < len(parts) && regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`).MatchString(parts[i]) {
+						// Object name should be the part before the date
+						image = "/" + strings.Join(parts[i-1:], "/")
+						break
+					}
+				}
+			}
+			if image == "" {
+				image = tt.path // fallback to full path
+			}
 
 			re := regexp.MustCompilePOSIX(Regex)
 			splitline := re.FindAllStringSubmatch(image, -1)
 
 			if len(splitline) != 1 {
-				t.Errorf("Expected regex to match for path: %s", tt.path)
+				t.Errorf("Expected regex to match for path: %s (processed as: %s)", tt.path, image)
 				return
 			}
 
@@ -290,7 +307,7 @@ func TestRotationHandling(t *testing.T) {
 	FlatList = flats{}
 	Rotations = []float32{}
 	TimeFrame = 24
-	Regex = `.*/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/([^/]+)/.*_LIGHT_([LRGBSHO]*)_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
 
 	tests := []struct {
 		name     string
@@ -300,13 +317,13 @@ func TestRotationHandling(t *testing.T) {
 	}{
 		{
 			name:     "rotation used - parse from filename",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
 			rotUsed:  true,
 			expected: 45.50,
 		},
 		{
 			name:     "rotation not used - default 666",
-			path:     "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
+			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
 			rotUsed:  false,
 			expected: 666,
 		},
@@ -358,9 +375,9 @@ func TestRotationHandling(t *testing.T) {
 
 func TestRegexExtraction(t *testing.T) {
 	// Test the regex extraction logic directly
-	Regex = `.*/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/([^/]+)/.*_LIGHT_([LRGBSHO]*)_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
 
-	testPath := "/data/2025-01-15/M42/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT"
+	testPath := "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT"
 
 	re := regexp.MustCompilePOSIX(Regex)
 	splitline := re.FindAllStringSubmatch(testPath, -1)
