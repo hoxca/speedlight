@@ -47,7 +47,7 @@ test-race:    ARGS=-race         ## Run tests with race detector
 $(TEST_TARGETS): NAME=$(MAKECMDGOALS:test-%=%)
 $(TEST_TARGETS): test
 check test tests: fmt lint ; $(info $(M) running $(NAME:%=% )tests…) @ ## Run tests
-	$Q $(GOTEST) -- -timeout $(TIMEOUT)s $(ARGS) $(TESTPKGS)
+	$Q $(GOTEST) -- -json -timeout $(TIMEOUT)s $(ARGS) $(TESTPKGS)
 
 .PHONY: test-integration
 test-integration: fmt lint ; $(info $(M) running $(NAME:%=% )tests…) @ ## Run tests
@@ -62,9 +62,9 @@ test-verbose: fmt lint ; $(info $(M) running $(NAME:%=% )tests…) @ ## Run test
 	$Q $(GOTEST) -f testdox -- -timeout $(TIMEOUT)s $(ARGS) $(TESTPKGS)
 
 COVERAGE_MODE    = atomic
-COVERAGE_PROFILE = $(COVERAGE_DIR)/profile.out
+COVERAGE_PROFILE = $(COVERAGE_DIR)/coverage.out
+COVERAGE_DIR := $(CURDIR)/test
 .PHONY: test-coverage
-test-coverage: COVERAGE_DIR := $(CURDIR)/test/coverage.out
 test-coverage: fmt lint; $(info $(M) running coverage tests…) @ ## Run coverage tests
 	$Q mkdir -p $(COVERAGE_DIR)
 	$Q $(GOTEST) -- \
