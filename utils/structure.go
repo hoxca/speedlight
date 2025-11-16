@@ -35,6 +35,8 @@ type Object struct {
 type Objects map[string]Object
 type Targets map[string]Target
 
+var RotUsed bool
+
 var ObjectList = Objects{}
 var targetList = Targets{}
 var t *Target

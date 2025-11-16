@@ -10,6 +10,8 @@ import (
 	"io"
 	"math"
 	"os"
+
+	Log "github.com/apatters/go-conlog"
 )
 
 type WriteDestination struct {
@@ -126,7 +128,7 @@ func (obs *Objects) PrintObjects(Lightsdir string) {
 		dest := fmt.Sprintf("%s/Lights_Report.txt", Lightsdir)
 		report, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 		if err != nil {
-			logFatal(err)
+			Log.Fatal(err)
 		}
 		defer report.Close()
 

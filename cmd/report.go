@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"path/filepath"
 	"speedlight/utils"
 	"strings"
 
+	Log "github.com/apatters/go-conlog"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +36,7 @@ it will sum time exposure by target and temperature.`,
 		utils.RotUsed, _ = cmd.Flags().GetBool("rotation")
 		err := filepath.Walk(lightsdir, utils.Traversal)
 		if err != nil {
-			log.Fatal(err)
+			Log.Fatal(err)
 		}
 		utils.ObjectList.PrintObjects(lightsdir)
 	},

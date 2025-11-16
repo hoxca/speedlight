@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"path/filepath"
 	"strings"
 
@@ -36,14 +35,13 @@ var filtersCmd = &cobra.Command{
 
 		err := filepath.Walk(lightsdir, utils.Flatsversal)
 		if err != nil {
-			log.Fatal(err)
+			Log.Fatal(err)
 		}
 
 		Log.Debugf("Number of targets detected: %d", len(utils.Rotations))
 		if targetNumber < len(utils.Rotations) {
 			if !utils.RotUsed {
 				fmt.Println(utils.FlatList[666])
-
 			} else {
 				fltrs := utils.FlatList[utils.Rotations[targetNumber]]
 				fmt.Println(fltrs)

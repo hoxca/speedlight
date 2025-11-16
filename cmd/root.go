@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"speedlight/utils"
@@ -60,7 +59,7 @@ func initConfig() {
 		// Switch to default program path
 		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 		if err != nil {
-			log.Fatal(err)
+			Log.Fatal(err)
 		}
 
 		confdir := fmt.Sprintf("%s/conf", dir)

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"path/filepath"
 	"strings"
 
@@ -29,7 +28,7 @@ var rotationCmd = &cobra.Command{
 			utils.RotUsed = true
 			err := filepath.Walk(lightsdir, utils.Flatsversal)
 			if err != nil {
-				log.Fatal(err)
+				Log.Fatal(err)
 			}
 
 			Log.Debugf("Number of targets detected: %d", len(utils.Rotations))
