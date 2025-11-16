@@ -10,12 +10,16 @@ import (
 	"time"
 )
 
+const (
+	testRegex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+)
+
 func TestTraversalRegexParsing(t *testing.T) {
 	// Reset global state before test
 	ObjectList = Objects{}
 	targetList = Targets{}
 	RotUsed = true
-	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = testRegex
 
 	tests := []struct {
 		name     string
@@ -97,7 +101,7 @@ func TestFlatsversalRegexParsing(t *testing.T) {
 	Rotations = []float32{}
 	RotUsed = true
 	TimeFrame = 24 // 24 hours to ensure files are within time window
-	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = testRegex
 
 	tests := []struct {
 		name     string
@@ -164,7 +168,7 @@ func TestTimeFiltering(t *testing.T) {
 	Rotations = []float32{}
 	TimeFrame = 2 // 2 hours
 	RotUsed = true
-	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = testRegex
 
 	tests := []struct {
 		name     string
@@ -241,21 +245,24 @@ func TestPathHandling(t *testing.T) {
 	ObjectList = Objects{}
 	targetList = Targets{}
 	RotUsed = true
-	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = testRegex
 
 	tests := []struct {
 		name     string
-		path     string
+		rootPath string
+		fullPath string
 		expected string // expected object name
 	}{
 		{
 			name:     "unix path",
-			path:     "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
+			rootPath: "/lights",
+			fullPath: "/lights/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT",
 			expected: "M42",
 		},
 		{
 			name:     "path with nested directory",
-			path:     "/very/long/path/to/NGC7635/2025-01-15/H/NGC7635_LIGHT_H_180s_BIN1_5C_GA2750_20250115_233348_235_PA239.88_W.FIT",
+			rootPath: "/very/long/path/to",
+			fullPath: "/very/long/path/to/NGC7635/2025-01-15/H/NGC7635_LIGHT_H_180s_BIN1_5C_GA2750_20250115_233348_235_PA239.88_W.FIT",
 			expected: "NGC7635",
 		},
 	}
@@ -263,29 +270,13 @@ func TestPathHandling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Simulate the path trimming that happens in walker.go
-			// The walker trims the root path, but keeps the object directory and date structure
-			parts := strings.Split(tt.path, "/")
-			var image string
-			if len(parts) >= 4 {
-				// Find the object name (usually before the date pattern)
-				for i := 1; i < len(parts); i++ {
-					// Look for date pattern YYYY-MM-DD
-					if i+1 < len(parts) && regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`).MatchString(parts[i]) {
-						// Object name should be the part before the date
-						image = "/" + strings.Join(parts[i-1:], "/")
-						break
-					}
-				}
-			}
-			if image == "" {
-				image = tt.path // fallback to full path
-			}
+			image := strings.TrimPrefix(tt.fullPath, tt.rootPath)
 
 			re := regexp.MustCompilePOSIX(Regex)
 			splitline := re.FindAllStringSubmatch(image, -1)
 
 			if len(splitline) != 1 {
-				t.Errorf("Expected regex to match for path: %s (processed as: %s)", tt.path, image)
+				t.Errorf("Expected regex to match for path: %s (processed as: %s)", tt.fullPath, image)
 				return
 			}
 
@@ -307,7 +298,7 @@ func TestRotationHandling(t *testing.T) {
 	FlatList = flats{}
 	Rotations = []float32{}
 	TimeFrame = 24
-	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = testRegex
 
 	tests := []struct {
 		name     string
@@ -375,7 +366,7 @@ func TestRotationHandling(t *testing.T) {
 
 func TestRegexExtraction(t *testing.T) {
 	// Test the regex extraction logic directly
-	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
+	Regex = testRegex
 
 	testPath := "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT"
 
