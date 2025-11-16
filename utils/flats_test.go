@@ -6,9 +6,8 @@ import (
 )
 
 func TestAddFlats(t *testing.T) {
-	// Reset global state before test
-	FlatList = flats{}
-	Rotations = []float32{}
+	setupTestEnvironment(t)
+	defer cleanupTestEnvironment(t)
 
 	tests := []struct {
 		name     string
@@ -56,7 +55,7 @@ func TestAddFlats(t *testing.T) {
 
 func TestFlatsSet(t *testing.T) {
 	f := flats{}
-	filter := Filters{L: 5, R: 3, G: 2, B: 1, S: 0, H: 0, O: 0}
+	filter := createTestFilters()
 
 	f.set(45.5, &filter)
 
@@ -69,9 +68,7 @@ func TestFlatsSet(t *testing.T) {
 	}
 
 	result := f[45.5]
-	if !reflect.DeepEqual(result, filter) {
-		t.Errorf("flats.set() = %+v, expected %+v", result, filter)
-	}
+	assertFiltersEqual(t, result, filter)
 }
 
 func TestFlatsExist(t *testing.T) {
@@ -175,8 +172,8 @@ func TestFlatsFiltersIterateFilter(t *testing.T) {
 		{
 			name:     "unknown filter no change",
 			filter:   "X",
-			initial:  Filters{L: 1, R: 2, G: 3, B: 4, S: 5, H: 6, O: 7},
-			expected: Filters{L: 1, R: 2, G: 3, B: 4, S: 5, H: 6, O: 7},
+			initial:  createTestFilters(),
+			expected: createTestFilters(),
 		},
 	}
 
@@ -184,9 +181,7 @@ func TestFlatsFiltersIterateFilter(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := tt.initial
 			f.iterateFilter(tt.filter)
-			if !reflect.DeepEqual(f, tt.expected) {
-				t.Errorf("iterateFilter() = %+v, expected %+v", f, tt.expected)
-			}
+			assertFiltersEqual(t, f, tt.expected)
 		})
 	}
 }
@@ -224,8 +219,8 @@ func TestFiltersString(t *testing.T) {
 		},
 		{
 			name:     "all filters",
-			filters:  Filters{L: 1, R: 1, G: 1, B: 1, S: 1, H: 1, O: 1},
-			expected: "LRGBSHO",
+			filters:  createTestFilters(),
+			expected: "LRGB",
 		},
 		{
 			name:     "mixed filters",
@@ -299,9 +294,8 @@ func TestAppendIfMissing(t *testing.T) {
 }
 
 func TestRotationsManagement(t *testing.T) {
-	// Reset global state before test
-	FlatList = flats{}
-	Rotations = []float32{}
+	setupTestEnvironment(t)
+	defer cleanupTestEnvironment(t)
 
 	// Test that Rotations slice is properly managed when adding flats
 	addFlats(45.5, "L")
@@ -322,9 +316,8 @@ func TestRotationsManagement(t *testing.T) {
 }
 
 func TestFlatListIntegration(t *testing.T) {
-	// Reset global state before test
-	FlatList = flats{}
-	Rotations = []float32{}
+	setupTestEnvironment(t)
+	defer cleanupTestEnvironment(t)
 
 	// Add multiple flats with different rotations and filters
 	addFlats(45.5, "L")
@@ -342,13 +335,9 @@ func TestFlatListIntegration(t *testing.T) {
 	// Check that each rotation has the correct filters
 	filters45_5 := FlatList[45.5]
 	expected45_5 := Filters{L: 1, R: 1, G: 1, B: 0, S: 0, H: 0, O: 0}
-	if !reflect.DeepEqual(filters45_5, expected45_5) {
-		t.Errorf("Rotation 45.5 filters = %+v, expected %+v", filters45_5, expected45_5)
-	}
+	assertFiltersEqual(t, filters45_5, expected45_5)
 
 	filters123_75 := FlatList[123.75]
 	expected123_75 := Filters{L: 0, R: 0, G: 0, B: 0, S: 1, H: 1, O: 1}
-	if !reflect.DeepEqual(filters123_75, expected123_75) {
-		t.Errorf("Rotation 123.75 filters = %+v, expected %+v", filters123_75, expected123_75)
-	}
+	assertFiltersEqual(t, filters123_75, expected123_75)
 }

@@ -10,16 +10,8 @@ import (
 	"time"
 )
 
-const (
-	testRegex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.?[[:digit:]]?[[:digit:]]?)_[EW]\.FIT`
-)
-
 func TestTraversalRegexParsing(t *testing.T) {
-	// Reset global state before test
-	ObjectList = Objects{}
-	targetList = Targets{}
-	RotUsed = true
-	Regex = testRegex
+	setupTestEnvironment(t)
 
 	tests := []struct {
 		name     string
@@ -55,6 +47,7 @@ func TestTraversalRegexParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			setupTestEnvironment(t)
 			// Test the regex processing directly
 			image := tt.path // Use the full path for testing
 
@@ -88,20 +81,12 @@ func TestTraversalRegexParsing(t *testing.T) {
 					t.Errorf("Expected object to be created after regex match")
 				}
 			}
-
-			// Reset for next test
-			ObjectList = Objects{}
 		})
 	}
 }
 
 func TestFlatsversalRegexParsing(t *testing.T) {
-	// Reset global state before test
-	FlatList = flats{}
-	Rotations = []float32{}
-	RotUsed = true
-	TimeFrame = 24 // 24 hours to ensure files are within time window
-	Regex = testRegex
+	setupTestEnvironment(t)
 
 	tests := []struct {
 		name     string
@@ -127,6 +112,7 @@ func TestFlatsversalRegexParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			setupTestEnvironment(t)
 			// Test the regex processing directly
 			image := tt.path // Use the full path for testing
 
@@ -155,20 +141,13 @@ func TestFlatsversalRegexParsing(t *testing.T) {
 					t.Errorf("Expected flat to be created after regex match")
 				}
 			}
-
-			// Reset for next test
-			FlatList = flats{}
 		})
 	}
 }
 
 func TestTimeFiltering(t *testing.T) {
-	// Reset global state
-	FlatList = flats{}
-	Rotations = []float32{}
+	setupTestEnvironment(t)
 	TimeFrame = 2 // 2 hours
-	RotUsed = true
-	Regex = testRegex
 
 	tests := []struct {
 		name     string
@@ -198,6 +177,8 @@ func TestTimeFiltering(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			setupTestEnvironment(t)
+			TimeFrame = 2
 			// Test the regex processing directly
 			image := tt.path // Use the full path for testing
 
@@ -233,19 +214,12 @@ func TestTimeFiltering(t *testing.T) {
 			if !tt.expected && hasFlats {
 				t.Errorf("Expected file to not be processed, but flats were created for path: %s", tt.path)
 			}
-
-			// Reset for next test
-			FlatList = flats{}
 		})
 	}
 }
 
 func TestPathHandling(t *testing.T) {
-	// Reset global state
-	ObjectList = Objects{}
-	targetList = Targets{}
-	RotUsed = true
-	Regex = testRegex
+	setupTestEnvironment(t)
 
 	tests := []struct {
 		name     string
@@ -269,6 +243,7 @@ func TestPathHandling(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			setupTestEnvironment(t)
 			// Simulate the path trimming that happens in walker.go
 			image := strings.TrimPrefix(tt.fullPath, tt.rootPath)
 
@@ -286,19 +261,12 @@ func TestPathHandling(t *testing.T) {
 			if objectName != tt.expected {
 				t.Errorf("Expected object name %s, got %s", tt.expected, objectName)
 			}
-
-			// Reset for next test
-			ObjectList = Objects{}
 		})
 	}
 }
 
 func TestRotationHandling(t *testing.T) {
-	// Reset global state
-	FlatList = flats{}
-	Rotations = []float32{}
-	TimeFrame = 24
-	Regex = testRegex
+	setupTestEnvironment(t)
 
 	tests := []struct {
 		name     string
@@ -322,6 +290,7 @@ func TestRotationHandling(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			setupTestEnvironment(t)
 			RotUsed = tt.rotUsed
 
 			// Test the regex processing directly
@@ -357,16 +326,12 @@ func TestRotationHandling(t *testing.T) {
 			} else {
 				t.Errorf("Expected flats to be created for path: %s", tt.path)
 			}
-
-			// Reset for next test
-			FlatList = flats{}
 		})
 	}
 }
 
 func TestRegexExtraction(t *testing.T) {
-	// Test the regex extraction logic directly
-	Regex = testRegex
+	setupTestEnvironment(t)
 
 	testPath := "/M42/2025-01-15/L/M42_LIGHT_L_600s_BIN1_-20C_GA2750_20250115_222558_734_PA045.50_E.FIT"
 

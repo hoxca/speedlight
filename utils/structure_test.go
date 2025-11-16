@@ -15,50 +15,50 @@ func TestFiltersIterateFilter(t *testing.T) {
 		{
 			name:     "increment L filter",
 			filter:   "L",
-			initial:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-			expected: Filters{L: 1, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
+			initial:  Filters{},
+			expected: Filters{L: 1},
 		},
 		{
 			name:     "increment R filter",
 			filter:   "R",
-			initial:  Filters{L: 2, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-			expected: Filters{L: 2, R: 1, G: 0, B: 0, S: 0, H: 0, O: 0},
+			initial:  Filters{L: 2},
+			expected: Filters{L: 2, R: 1},
 		},
 		{
 			name:     "increment G filter",
 			filter:   "G",
-			initial:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-			expected: Filters{L: 0, R: 0, G: 1, B: 0, S: 0, H: 0, O: 0},
+			initial:  Filters{},
+			expected: Filters{G: 1},
 		},
 		{
 			name:     "increment B filter",
 			filter:   "B",
-			initial:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-			expected: Filters{L: 0, R: 0, G: 0, B: 1, S: 0, H: 0, O: 0},
+			initial:  Filters{},
+			expected: Filters{B: 1},
 		},
 		{
 			name:     "increment S filter",
 			filter:   "S",
-			initial:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-			expected: Filters{L: 0, R: 0, G: 0, B: 0, S: 1, H: 0, O: 0},
+			initial:  Filters{},
+			expected: Filters{S: 1},
 		},
 		{
 			name:     "increment H filter",
 			filter:   "H",
-			initial:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-			expected: Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 1, O: 0},
+			initial:  Filters{},
+			expected: Filters{H: 1},
 		},
 		{
 			name:     "increment O filter",
 			filter:   "O",
-			initial:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-			expected: Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 1},
+			initial:  Filters{},
+			expected: Filters{O: 1},
 		},
 		{
 			name:     "unknown filter no change",
 			filter:   "X",
-			initial:  Filters{L: 1, R: 2, G: 3, B: 4, S: 5, H: 6, O: 7},
-			expected: Filters{L: 1, R: 2, G: 3, B: 4, S: 5, H: 6, O: 7},
+			initial:  createTestFilters(),
+			expected: createTestFilters(),
 		},
 	}
 
@@ -66,9 +66,7 @@ func TestFiltersIterateFilter(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f := tt.initial
 			f.iterateFilter(tt.filter)
-			if !reflect.DeepEqual(f, tt.expected) {
-				t.Errorf("iterateFilter() = %+v, expected %+v", f, tt.expected)
-			}
+			assertFiltersEqual(t, f, tt.expected)
 		})
 	}
 }
@@ -87,7 +85,7 @@ func TestNewTarget(t *testing.T) {
 				name:  "M42",
 				temp:  -20,
 				expo:  300,
-				fltr:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
+				fltr:  Filters{},
 			},
 		},
 		{
@@ -98,7 +96,7 @@ func TestNewTarget(t *testing.T) {
 				name:  "NGC7635",
 				temp:  5,
 				expo:  180,
-				fltr:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
+				fltr:  Filters{},
 			},
 		},
 		{
@@ -109,7 +107,7 @@ func TestNewTarget(t *testing.T) {
 				name:  "M42",
 				temp:  0,
 				expo:  300,
-				fltr:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
+				fltr:  Filters{},
 			},
 		},
 	}
@@ -117,20 +115,17 @@ func TestNewTarget(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := newTarget(tt.target)
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("newTarget() = %+v, expected %+v", result, tt.expected)
-			}
+			assertTargetEqual(t, result, tt.expected)
 		})
 	}
 }
 
 func TestNewObject(t *testing.T) {
 	tests := []struct {
-		name         string
-		target       string
-		rotation     float32
-		expected     *Object
-		expectedName string
+		name     string
+		target   string
+		rotation float32
+		expected *Object
 	}{
 		{
 			name:     "valid object creation",
@@ -141,7 +136,6 @@ func TestNewObject(t *testing.T) {
 				rotation: 45.5,
 				targets:  make(map[string]Target),
 			},
-			expectedName: "M42",
 		},
 		{
 			name:     "object with special rotation",
@@ -152,22 +146,13 @@ func TestNewObject(t *testing.T) {
 				rotation: 666,
 				targets:  make(map[string]Target),
 			},
-			expectedName: "NGC7635",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := newObject(tt.target, tt.rotation)
-			if result.name != tt.expected.name {
-				t.Errorf("newObject() name = %v, expected %v", result.name, tt.expected.name)
-			}
-			if result.rotation != tt.expected.rotation {
-				t.Errorf("newObject() rotation = %v, expected %v", result.rotation, tt.expected.rotation)
-			}
-			if result.targets == nil {
-				t.Error("newObject() targets should be initialized")
-			}
+			assertObjectEqual(t, result, tt.expected)
 		})
 	}
 }
@@ -181,13 +166,13 @@ func TestObjectsExist(t *testing.T) {
 	}{
 		{
 			name:     "existing key",
-			objects:  Objects{"M42": {name: "M42"}},
+			objects:  Objects{"M42": *createTestObject("M42", 45.5)},
 			key:      "M42",
 			expected: true,
 		},
 		{
 			name:     "non-existing key",
-			objects:  Objects{"M42": {name: "M42"}},
+			objects:  Objects{"M42": *createTestObject("M42", 45.5)},
 			key:      "NGC7635",
 			expected: false,
 		},
@@ -218,13 +203,13 @@ func TestTargetsExist(t *testing.T) {
 	}{
 		{
 			name:     "existing key",
-			targets:  Targets{"M42~-20~300": {tuple: "M42~-20~300"}},
+			targets:  Targets{"M42~-20~300": *createTestTarget("M42~-20~300")},
 			key:      "M42~-20~300",
 			expected: true,
 		},
 		{
 			name:     "non-existing key",
-			targets:  Targets{"M42~-20~300": {tuple: "M42~-20~300"}},
+			targets:  Targets{"M42~-20~300": *createTestTarget("M42~-20~300")},
 			key:      "M42~-15~300",
 			expected: false,
 		},
@@ -248,7 +233,7 @@ func TestTargetsExist(t *testing.T) {
 
 func TestObjectsSet(t *testing.T) {
 	objects := Objects{}
-	obj := &Object{name: "M42", rotation: 45.5, targets: make(map[string]Target)}
+	obj := createTestObject("M42", 45.5)
 
 	objects.set("M42", obj)
 
@@ -262,18 +247,8 @@ func TestObjectsSet(t *testing.T) {
 }
 
 func TestObjectSetTarget(t *testing.T) {
-	obj := &Object{
-		name:     "M42",
-		rotation: 45.5,
-		targets:  make(map[string]Target),
-	}
-	target := &Target{
-		tuple: "M42~-20~300",
-		name:  "M42",
-		temp:  -20,
-		expo:  300,
-		fltr:  Filters{L: 1, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-	}
+	obj := newObject("M42", 45.5)
+	target := createTestTarget("M42~-20~300")
 
 	obj.setTarget("M42~-20~300", target)
 
@@ -295,9 +270,9 @@ func TestObjectsGetObjects(t *testing.T) {
 		{
 			name: "multiple objects unsorted",
 			objects: Objects{
-				"Z": {name: "Z"},
-				"A": {name: "A"},
-				"M": {name: "M"},
+				"Z": *createTestObject("Z", 0),
+				"A": *createTestObject("A", 0),
+				"M": *createTestObject("M", 0),
 			},
 			expected: []string{"A", "M", "Z"},
 		},
@@ -309,7 +284,7 @@ func TestObjectsGetObjects(t *testing.T) {
 		{
 			name: "single object",
 			objects: Objects{
-				"M42": {name: "M42"},
+				"M42": *createTestObject("M42", 45.5),
 			},
 			expected: []string{"M42"},
 		},
@@ -326,22 +301,10 @@ func TestObjectsGetObjects(t *testing.T) {
 }
 
 func TestTargetsGetTarget(t *testing.T) {
-	target := Target{
-		tuple: "M42~-20~300",
-		name:  "M42",
-		temp:  -20,
-		expo:  300,
-		fltr:  Filters{L: 1, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-	}
+	target := createTestTarget("M42~-20~300")
 	targets := Targets{
-		"M42~-20~300": target,
-		"NGC7635~5~180": {
-			tuple: "NGC7635~5~180",
-			name:  "NGC7635",
-			temp:  5,
-			expo:  180,
-			fltr:  Filters{L: 0, R: 1, G: 0, B: 0, S: 0, H: 0, O: 0},
-		},
+		"M42~-20~300":   *target,
+		"NGC7635~5~180": *createTestTarget("NGC7635~5~180"),
 	}
 
 	tests := []struct {
@@ -354,7 +317,7 @@ func TestTargetsGetTarget(t *testing.T) {
 			name:     "existing target",
 			targets:  targets,
 			key:      "M42~-20~300",
-			expected: &target,
+			expected: target,
 		},
 		{
 			name:     "non-existing target",
@@ -381,18 +344,10 @@ func TestTargetsGetTarget(t *testing.T) {
 }
 
 func TestObjectsGetObject(t *testing.T) {
-	obj := Object{
-		name:     "M42",
-		rotation: 45.5,
-		targets:  make(map[string]Target),
-	}
+	obj := createTestObject("M42", 45.5)
 	objects := Objects{
-		"M42": obj,
-		"NGC7635": {
-			name:     "NGC7635",
-			rotation: 123.0,
-			targets:  make(map[string]Target),
-		},
+		"M42":     *obj,
+		"NGC7635": *createTestObject("NGC7635", 123.0),
 	}
 
 	tests := []struct {
@@ -405,7 +360,7 @@ func TestObjectsGetObject(t *testing.T) {
 			name:     "existing object",
 			objects:  objects,
 			key:      "M42",
-			expected: &obj,
+			expected: obj,
 		},
 		{
 			name:     "non-existing object",
@@ -432,9 +387,7 @@ func TestObjectsGetObject(t *testing.T) {
 }
 
 func TestAddTarget(t *testing.T) {
-	// Reset global state before test
-	ObjectList = Objects{}
-	targetList = Targets{}
+	setupTestEnvironment(t)
 
 	tests := []struct {
 		name     string
@@ -470,18 +423,8 @@ func TestAddTarget(t *testing.T) {
 }
 
 func TestObjectAddFilter(t *testing.T) {
-	obj := &Object{
-		name:     "M42",
-		rotation: 45.5,
-		targets:  make(map[string]Target),
-	}
-	target := &Target{
-		tuple: "M42~-20~300",
-		name:  "M42",
-		temp:  -20,
-		expo:  300,
-		fltr:  Filters{L: 0, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-	}
+	obj := newObject("M42", 45.5)
+	target := newTarget("M42~-20~300")
 	obj.setTarget("M42~-20~300", target)
 
 	tests := []struct {
@@ -509,9 +452,7 @@ func TestObjectAddFilter(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			obj.addFilter("M42~-20~300", tt.filter)
 			updatedTarget := obj.targets["M42~-20~300"]
-			if !reflect.DeepEqual(updatedTarget.fltr, tt.expected) {
-				t.Errorf("Object.addFilter() = %+v, expected %+v", updatedTarget.fltr, tt.expected)
-			}
+			assertFiltersEqual(t, updatedTarget.fltr, tt.expected)
 		})
 	}
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -64,8 +65,7 @@ func createTestFilters() Filters {
 
 // assertFiltersEqual compares two Filters structs for testing
 func assertFiltersEqual(t *testing.T, got, expected Filters) {
-	if got.L != expected.L || got.R != expected.R || got.G != expected.G ||
-		got.B != expected.B || got.S != expected.S || got.H != expected.H || got.O != expected.O {
+	if !reflect.DeepEqual(got, expected) {
 		t.Errorf("Filters mismatch: got %+v, expected %+v", got, expected)
 	}
 }
@@ -108,6 +108,10 @@ func setupTestEnvironment(t *testing.T) {
 	TimeFrame = 24
 	Regex = `/(.*)/[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}/(.*)/.*_LIGHT_[LRGBSHO]*_([[:digit:]]*)s_BIN1_(.*)C_GA.*_[[:digit:]]{8}_[[:digit:]]{6}_[[:digit:]]{3}_PA([[:digit:]]{3}\.[[:digit:]]{2})_[EW]\.FIT`
 	RotUsed = true
+
+	t.Cleanup(func() {
+		cleanupTestEnvironment(t)
+	})
 }
 
 // cleanupTestEnvironment cleans up after a test

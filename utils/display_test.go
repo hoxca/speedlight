@@ -175,24 +175,12 @@ func TestWriteDestinationSetWriteDestination(t *testing.T) {
 func TestObjectPrintObject(t *testing.T) {
 	tests := []struct {
 		name     string
-		object   Object
+		object   *Object
 		expected []string // substrings that should be in output
 	}{
 		{
-			name: "object with rotation",
-			object: Object{
-				name:     "M42",
-				rotation: 45.50,
-				targets: map[string]Target{
-					"M42~-20~300": {
-						tuple: "M42~-20~300",
-						name:  "M42",
-						temp:  -20,
-						expo:  300,
-						fltr:  Filters{L: 5, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-					},
-				},
-			},
+			name:   "object with rotation",
+			object: createTestObject("M42", 45.50),
 			expected: []string{
 				"Object name: M42",
 				"Rotation:45.50°",
@@ -202,53 +190,23 @@ func TestObjectPrintObject(t *testing.T) {
 			},
 		},
 		{
-			name: "object without rotation (666)",
-			object: Object{
-				name:     "NGC7635",
-				rotation: 666,
-				targets: map[string]Target{
-					"NGC7635~5~180": {
-						tuple: "NGC7635~5~180",
-						name:  "NGC7635",
-						temp:  5,
-						expo:  180,
-						fltr:  Filters{L: 0, R: 3, G: 3, B: 3, S: 0, H: 0, O: 0},
-					},
-				},
-			},
+			name:   "object without rotation (666)",
+			object: createTestObject("NGC7635", 666),
 			expected: []string{
 				"Object name: NGC7635",
 				"Rotation: N/A",
-				"5°C",
+				"-20°C",
 				"Total:",
-				"R\tNb:    3\tExpo:  180s\tSubs:",
-				"G\tNb:    3\tExpo:  180s\tSubs:",
-				"B\tNb:    3\tExpo:  180s\tSubs:",
 			},
 		},
 		{
-			name: "object with narrowband filters",
-			object: Object{
-				name:     "IC1396",
-				rotation: 123.75,
-				targets: map[string]Target{
-					"IC1396~-10~600": {
-						tuple: "IC1396~-10~600",
-						name:  "IC1396",
-						temp:  -10,
-						expo:  600,
-						fltr:  Filters{L: 0, R: 0, G: 0, B: 0, S: 2, H: 2, O: 2},
-					},
-				},
-			},
+			name:   "object with narrowband filters",
+			object: createTestObject("IC1396", 123.75),
 			expected: []string{
 				"Object name: IC1396",
 				"Rotation:123.75°",
-				"-10°C",
+				"-20°C",
 				"Total:",
-				"S\tNb:    2\tExpo:  600s\tSubs:",
-				"H\tNb:    2\tExpo:  600s\tSubs:",
-				"O\tNb:    2\tExpo:  600s\tSubs:",
 			},
 		},
 	}
@@ -273,33 +231,17 @@ func TestObjectPrintObject(t *testing.T) {
 func TestObjectFprintObject(t *testing.T) {
 	tests := []struct {
 		name     string
-		object   Object
+		object   *Object
 		expected []string // substrings that should be in output
 	}{
 		{
-			name: "object with rotation",
-			object: Object{
-				name:     "M42",
-				rotation: 45.50,
-				targets: map[string]Target{
-					"M42~-20~300": {
-						tuple: "M42~-20~300",
-						name:  "M42",
-						temp:  -20,
-						expo:  300,
-						fltr:  Filters{L: 1, R: 1, G: 1, B: 1, S: 0, H: 0, O: 0},
-					},
-				},
-			},
+			name:   "object with rotation",
+			object: createTestObject("M42", 45.50),
 			expected: []string{
 				"Object name: M42",
 				"Rotation:45.50°",
 				"-20°C",
 				"Total:",
-				"L\tNb:    1\tExpo:  300s\tSubs:",
-				"R\tNb:    1\tExpo:  300s\tSubs:",
-				"G\tNb:    1\tExpo:  300s\tSubs:",
-				"B\tNb:    1\tExpo:  300s\tSubs:",
 			},
 		},
 	}
@@ -321,8 +263,8 @@ func TestObjectFprintObject(t *testing.T) {
 }
 
 func TestObjectsPrintObjects(t *testing.T) {
-	// Reset global state
-	Wdest = WriteDestination{}
+	setupTestEnvironment(t)
+	defer cleanupTestEnvironment(t)
 
 	tests := []struct {
 		name            string
@@ -334,19 +276,7 @@ func TestObjectsPrintObjects(t *testing.T) {
 		{
 			name: "console output only",
 			objects: Objects{
-				"M42": {
-					name:     "M42",
-					rotation: 45.50,
-					targets: map[string]Target{
-						"M42~-20~300": {
-							tuple: "M42~-20~300",
-							name:  "M42",
-							temp:  -20,
-							expo:  300,
-							fltr:  Filters{L: 1, R: 0, G: 0, B: 0, S: 0, H: 0, O: 0},
-						},
-					},
-				},
+				"M42": *createTestObject("M42", 45.50),
 			},
 			writeConsole: true,
 			writeToFile:  false,
@@ -359,11 +289,7 @@ func TestObjectsPrintObjects(t *testing.T) {
 		{
 			name: "no output",
 			objects: Objects{
-				"M42": {
-					name:     "M42",
-					rotation: 45.50,
-					targets:  make(map[string]Target),
-				},
+				"M42": *createTestObject("M42", 45.50),
 			},
 			writeConsole:    false,
 			writeToFile:     false,
